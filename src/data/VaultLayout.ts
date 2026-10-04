@@ -71,3 +71,9 @@ export function projectNotePath(
   const name = safeName(projectName);
   return `${folderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${name}/${name}.md`;
 }
+
+/** "Work/Clients/ABC Bank/ABC Bank.md" returns "ABC Bank". */
+export function noteNameOf(path: string): string {
+  const fileName = path.slice(path.lastIndexOf("/") + 1);
+  return fileName.endsWith(".md") ? fileName.slice(0, -3) : fileName;
+}
