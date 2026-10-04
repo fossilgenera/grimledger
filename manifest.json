@@ -1,0 +1,9 @@
+{
+  "id": "grimledger",
+  "name": "Grimledger",
+  "version": "0.0.1",
+  "minAppVersion": "1.13.7",
+  "description": "Personal work management, productivity and work-history system.",
+  "author": "Your Name",
+  "isDesktopOnly": false
+}
