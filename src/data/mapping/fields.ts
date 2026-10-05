@@ -1,5 +1,5 @@
 import type { IsoDate } from "../../domain/types";
-import { fail, ok, type MapResult } from "./mapResult";
+import { fail, ok, type Result } from "../../domain/result";
 
 /** Runtime check that a value is one of the allowed strings. */
 export function isOneOf<T extends readonly string[]>(
@@ -37,7 +37,7 @@ function isRealIsoDate(text: string): boolean {
 /** Missing or empty gives undefined. Present but not a real ISO date is a failure. */
 export function readOptionalIsoDate(
   value: unknown,
-): MapResult<IsoDate | undefined> {
+): Result<IsoDate | undefined> {
   if (value === undefined || value === null || value === "") {
     return ok(undefined);
   }
@@ -48,7 +48,7 @@ export function readOptionalIsoDate(
 }
 
 /** Missing or empty gives false. Present but not boolean is a failure.*/
-export function readBooleanDefaultFalse(value: unknown, fieldName: string): MapResult<boolean> {
+export function readBooleanDefaultFalse(value: unknown, fieldName: string): Result<boolean> {
   if (value === undefined || value === null || value === "") {
     return ok(false);
   }

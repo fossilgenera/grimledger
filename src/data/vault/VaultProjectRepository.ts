@@ -7,7 +7,7 @@ import {
   validateEntityName,
   folderOf,
 } from "../VaultLayout";
-import { fail, ok, type MapResult } from "../mapping/mapResult";
+import { fail, ok, type Result } from "../../domain/result";
 import { projectFromFrontmatter, projectToFrontmatter } from "../mapping/projectMapper";
 import { parseWikilinkTarget } from "../mapping/wikilink";
 import type { ListResult, SkippedNote } from "../repositories/ListResult";
@@ -60,7 +60,7 @@ export class VaultProjectRepository implements ProjectRepository {
         return { items, skipped };
     }
 
-    async create(input: NewProjectInput): Promise<MapResult<Project>> {
+    async create(input: NewProjectInput): Promise<Result<Project>> {
         const nameError = validateEntityName(input.name);
         if (nameError !== undefined) {
             return fail(nameError);

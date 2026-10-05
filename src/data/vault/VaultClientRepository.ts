@@ -3,7 +3,7 @@ import { ClientRepository } from "../repositories/ClientRepository";
 import { ListResult, SkippedNote } from "../repositories/ListResult";
 import { Client } from "../../domain/models/client";
 import { clientFromFrontMatter, clientToFrontMatter } from "../mapping/clientMapper";
-import { fail, MapResult, ok } from "../mapping/mapResult";
+import { fail, Result, ok } from "../../domain/result";
 import { clientFolderPath, clientNotePath, noteNameOf, validateEntityName } from "../VaultLayout";
 import { ensureFolder } from "./ensureFolder";
 
@@ -29,7 +29,7 @@ export class VaultClientRepository implements ClientRepository {
         return { items, skipped };
     }
 
-    async create(name: string): Promise<MapResult<Client>> {
+    async create(name: string): Promise<Result<Client>> {
         const nameError = validateEntityName(name);
         if (nameError !== undefined) {
             return fail(nameError);

@@ -2,7 +2,7 @@ import { Project } from "../../domain/models/project";
 import { PRIORITIES, PROJECT_STATUSES } from "../../domain/types";
 import { noteNameOf } from "../VaultLayout";
 import { describeValue, isOneOf, readBooleanDefaultFalse, readOptionalIsoDate } from "./fields";
-import { fail, MapResult, ok } from "./mapResult";
+import { fail, Result, ok } from "../../domain/result";
 import { parseWikilinkTarget } from "./wikilink";
 
 type Frontmatter = Readonly<Record<string, unknown>> | undefined;
@@ -10,7 +10,7 @@ type Frontmatter = Readonly<Record<string, unknown>> | undefined;
 /** A `Project` whose client is still an unresolved link target. */
 export type ProjectRecord = Omit<Project, "client"> & { clientLinkPath: string };
 
-export function projectFromFrontmatter(path: string, frontMatter: Frontmatter): MapResult<ProjectRecord> {
+export function projectFromFrontmatter(path: string, frontMatter: Frontmatter): Result<ProjectRecord> {
   if (frontMatter?.["type"] !== "project") {
     return fail('Not a project note: "type" is not "project"');
   }
