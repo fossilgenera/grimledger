@@ -6,7 +6,7 @@ import {
   projectFolderPath,
   projectNotePath,
   validateEntityName,
-} from "../src/data/VaultLayout";
+} from "../../src/data/VaultLayout";
 
 describe("validateEntityName", () => {
   it("accepts a normal name", () => {
@@ -91,5 +91,10 @@ describe("path functions", () => {
   it("throws on an invalid name", () => {
     expect(() => clientFolderPath("a/b")).toThrow();
     expect(() => projectNotePath("Work/Clients/X/X.md", "")).toThrow();
+  });
+
+  it("throws when the client note path is not inside a folder", () => {
+    expect(() => projectFolderPath("ABC Bank", "MRI Reporting")).toThrow();
+    expect(() => projectNotePath("ABC Bank.md", "MRI Reporting")).toThrow();
   });
 });

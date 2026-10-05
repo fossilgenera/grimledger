@@ -56,20 +56,22 @@ export function clientNotePath(clientName: string): string {
   return `${CLIENTS_FOLDER}/${name}/${name}.md`;
 }
 
-/** Built from client note's actual location instead of just the name */
-export function projectFolderPath(
-  clientNotePath: string,
-  projectName: string,
-): string {
-  return `${folderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${safeName(projectName)}`;
+function requireFolderOf(notePath: string): string {
+  const folder = folderOf(notePath);
+  if (folder === "") {
+    throw new Error(`Note path ${notePath} is not inside a folder.`);
+  }
+  return folder;
 }
 
-export function projectNotePath(
-  clientNotePath: string,
-  projectName: string,
-): string {
+/** Built from client note's actual location instead of just the name */
+export function projectFolderPath(clientNotePath: string, projectName: string): string {
+  return `${requireFolderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${safeName(projectName)}`;
+}
+
+export function projectNotePath(clientNotePath: string, projectName: string): string {
   const name = safeName(projectName);
-  return `${folderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${name}/${name}.md`;
+  return `${requireFolderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${name}/${name}.md`;
 }
 
 /** "Work/Clients/ABC Bank/ABC Bank.md" returns "ABC Bank". */

@@ -5,6 +5,7 @@ import {
   projectFolderPath,
   projectNotePath,
   validateEntityName,
+  folderOf,
 } from "../VaultLayout";
 import { fail, ok, type MapResult } from "../mapping/mapResult";
 import { projectFromFrontmatter, projectToFrontmatter } from "../mapping/projectMapper";
@@ -41,6 +42,15 @@ export class VaultProjectRepository implements ProjectRepository {
                 continue;
             }
 
+            const clientFrontmatter = this.app.metadataCache.getFileCache(clientFile)?.frontmatter;
+            if (clientFrontmatter?.["type"] !== "client") {
+                skipped.push({
+                    path: file.path,
+                    reason: `Client link points to "${clientFile.path}, which is not a client note."`
+                });
+                continue;
+            }
+
             items.push({
                 ...rest,
                 client: { path: clientFile.path, name: noteNameOf(clientFile.path) },
@@ -61,7 +71,13 @@ export class VaultProjectRepository implements ProjectRepository {
             return fail(`Client note "${input.client.path}" does not exist.`);
         }
 
-        // All checks happen before folder is created.
+        // Client note at vault root has no folder to put a Projects folder next to
+        if (folderOf(input.client.path) === "") {
+            return fail(
+                `Client note "${input.client.path}" is not inside a folder, so a project cannot be created beside it.`
+            );
+        }
+
         const notePath = projectNotePath(input.client.path, input.name);
         if (this.app.vault.getAbstractFileByPath(notePath) !== null) {
             return fail(`A project named "${input.name}" already exists for client "${input.client.name}".`);
