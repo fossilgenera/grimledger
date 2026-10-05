@@ -34,6 +34,17 @@ function isRealIsoDate(text: string): boolean {
   );
 }
 
-/** TODO: read optional iso date function */
+/** Missing or empty gives undefined. */
+export function readOptionalIsoDate(
+  value: unknown,
+): MapResult<IsoDate | undefined> {
+  if (value === undefined || value === null || value === "") {
+    return ok(undefined);
+  }
+  if (typeof value === "string" && isRealIsoDate(value)) {
+    return ok(value);
+  }
+  return fail(`Invalid ISO date: ${describeValue(value)}, expected YYYY-MM-DD`);
+}
 
 /** TODO: read boolean default false function */
