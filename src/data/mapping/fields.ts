@@ -34,7 +34,7 @@ function isRealIsoDate(text: string): boolean {
   );
 }
 
-/** Missing or empty gives undefined. */
+/** Missing or empty gives undefined. Present but not a real ISO date is a failure. */
 export function readOptionalIsoDate(
   value: unknown,
 ): MapResult<IsoDate | undefined> {
@@ -47,4 +47,13 @@ export function readOptionalIsoDate(
   return fail(`Invalid ISO date: ${describeValue(value)}, expected YYYY-MM-DD`);
 }
 
-/** TODO: read boolean default false function */
+/** Missing or empty gives false. Present but not boolean is a failure.*/
+export function readBooleanDefaultFalse(value: unknown, fieldName: string): MapResult<boolean> {
+  if (value === undefined || value === null || value === "") {
+    return ok(false);
+  }
+  if (typeof value === "boolean") {
+    return ok(value);
+  }
+  return fail(`Invalid ${fieldName}: ${describeValue(value)}, expected true or false`);
+}
