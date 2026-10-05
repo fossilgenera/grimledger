@@ -62,7 +62,7 @@ export class VaultProjectRepository implements ProjectRepository {
         }
 
         // All checks happen before folder is created.
-        const notePath = projectNotePath(input.client.name, input.name);
+        const notePath = projectNotePath(input.client.path, input.name);
         if (this.app.vault.getAbstractFileByPath(notePath) !== null) {
             return fail(`A project named "${input.name}" already exists for client "${input.client.name}".`);
         }

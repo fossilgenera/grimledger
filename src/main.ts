@@ -1,19 +1,13 @@
-import { Notice, Plugin } from "obsidian";
+import { Plugin } from "obsidian";
+import { VaultClientRepository } from "./data/vault/VaultClientRepository";
+import { VaultProjectRepository } from "./data/vault/VaultProjectRepository";
+import { registerCommands } from "./obsidian/commands";
 
 export default class GrimledgerPlugin extends Plugin {
   override async onload(): Promise<void> {
-    console.log("Grimledger: loaded");
+    const clients = new VaultClientRepository(this.app);
+    const projects = new VaultProjectRepository(this.app);
 
-    this.addCommand({
-      id: "say-hello",
-      name: "Say hello",
-      callback: () => {
-        new Notice("Hello again from Grimledger!");
-      },
-    });
-  }
-
-  override onunload(): void {
-    console.log("Grimledger: unloaded");
+    registerCommands(this, { clients, projects });
   }
 }
