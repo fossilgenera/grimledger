@@ -57,3 +57,49 @@ export function readBooleanDefaultFalse(value: unknown, fieldName: string): Resu
   }
   return fail(`Invalid ${fieldName}: ${describeValue(value)}, expected true or false`);
 }
+
+/** Missing or empty is a failure. Present but not a real ISO date is a failure. */
+export function readRequiredIsoDate(
+  value: unknown,
+  fieldName: string,
+): Result<IsoDate> {
+  const result = readOptionalIsoDate(value);
+  if (!result.ok) {
+    return fail(`${fieldName}: ${result.reason}`);
+  }
+  if (result.value === undefined) {
+    return fail(`${fieldName}: missing`);
+  }
+  return ok(result.value);
+}
+
+/** Missing or empty gives undefined. Present but not a positive whole number is a failure. */
+export function readOptionalPositiveInteger(
+  value: unknown,
+  fieldName: string,
+): Result<number | undefined> {
+  if (value === undefined || value === null || value === "") {
+    return ok(undefined);
+  }
+  if (typeof value === "number" && Number.isInteger(value) && value > 0) {
+    return ok(value);
+  }
+  return fail(
+    `Invalid ${fieldName}: ${describeValue(value)}, expected a positive whole number`,
+  );
+}
+
+/** Missing, empty or whitespace-only gives undefined. Present but not text is a failure. */
+export function readOptionalText(
+  value: unknown,
+  fieldName: string,
+): Result<string | undefined> {
+  if (value === undefined || value === null) {
+    return ok(undefined);
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return ok(trimmed === "" ? undefined : trimmed);
+  }
+  return fail(`Invalid ${fieldName}: ${describeValue(value)}, expected text`);
+}

@@ -2,6 +2,7 @@ export const WORK_ROOT = "Work";
 
 const CLIENTS_FOLDER = `${WORK_ROOT}/Clients`;
 const PROJECTS_SEGMENT = "Projects";
+const TASKS_SEGMENT = "Tasks";
 
 const FORBIDDEN_CHARS = /[\\/:*?"<>|#^[\]]/;
 
@@ -72,6 +73,15 @@ export function projectFolderPath(clientNotePath: string, projectName: string): 
 export function projectNotePath(clientNotePath: string, projectName: string): string {
   const name = safeName(projectName);
   return `${requireFolderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${name}/${name}.md`;
+}
+
+// Built from the project note's actual location, not the project's name.
+export function taskFolderPath(projectNote: string): string {
+  return `${requireFolderOf(projectNote)}/${TASKS_SEGMENT}`;
+}
+
+export function taskNotePath(projectNote: string, taskName: string): string {
+  return `${taskFolderPath(projectNote)}/${safeName(taskName)}.md`;
 }
 
 /** "Work/Clients/ABC Bank/ABC Bank.md" returns "ABC Bank". */

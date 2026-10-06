@@ -6,6 +6,8 @@ import {
   projectFolderPath,
   projectNotePath,
   validateEntityName,
+  taskFolderPath,
+  taskNotePath,
 } from "../../src/data/VaultLayout";
 
 describe("validateEntityName", () => {
@@ -96,5 +98,44 @@ describe("path functions", () => {
   it("throws when the client note path is not inside a folder", () => {
     expect(() => projectFolderPath("ABC Bank", "MRI Reporting")).toThrow();
     expect(() => projectNotePath("ABC Bank.md", "MRI Reporting")).toThrow();
+  });
+});
+
+describe("task paths", () => {
+  const projectNote =
+    "Work/Clients/ABC Bank/Projects/MRI Reporting/MRI Reporting.md";
+
+  it("puts the Tasks folder beside the project note", () => {
+    expect(taskFolderPath(projectNote)).toBe(
+      "Work/Clients/ABC Bank/Projects/MRI Reporting/Tasks",
+    );
+  });
+
+  it("builds the task note path inside the Tasks folder", () => {
+    expect(taskNotePath(projectNote, "Fix mapping")).toBe(
+      "Work/Clients/ABC Bank/Projects/MRI Reporting/Tasks/Fix mapping.md",
+    );
+  });
+
+  it("trims the task name", () => {
+    expect(taskNotePath(projectNote, "  Fix mapping  ")).toBe(
+      "Work/Clients/ABC Bank/Projects/MRI Reporting/Tasks/Fix mapping.md",
+    );
+  });
+
+  it("derives the folder from the note path, not the project name", () => {
+    expect(taskFolderPath("Work/Clients/Moved/Projects/Renamed/Whatever.md")).toBe(
+      "Work/Clients/Moved/Projects/Renamed/Tasks",
+    );
+  });
+
+  it("throws on an invalid task name", () => {
+    expect(() => taskNotePath(projectNote, "bad/name")).toThrow();
+    expect(() => taskNotePath(projectNote, "   ")).toThrow();
+  });
+
+  it("throws when the project note is not inside a folder", () => {
+    expect(() => taskFolderPath("Orphan.md")).toThrow();
+    expect(() => taskNotePath("Orphan.md", "Task")).toThrow();
   });
 });
