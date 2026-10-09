@@ -14,6 +14,6 @@ export default class GrimledgerPlugin extends Plugin {
 
     const taskService = new TaskService(tasks, () => formatIsoDate(new Date()));
 
-    registerCommands(this, { clients, projects }, { tasks: taskService });
+    registerCommands(this, { clients, projects, tasks }, { tasks: taskService });
   }
 }
