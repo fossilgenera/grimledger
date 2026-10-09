@@ -3,10 +3,7 @@ import { isOneOf, readOptionalIsoDate } from "../../data/mapping/fields";
 import type { ProjectRepository } from "../../data/repositories/ProjectRepository";
 import type { Client } from "../../domain/models/client";
 import { PRIORITIES, type Priority } from "../../domain/types";
-
-function capitalise(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+import { capitalise } from "./capitalise";
 
 export class CreateProjectModal extends Modal {
   private selectedClient: Client;
