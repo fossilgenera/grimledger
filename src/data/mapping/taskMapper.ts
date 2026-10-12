@@ -20,7 +20,7 @@ export function taskFromFrontmatter(
 
     const projectLinkPath = parseWikilinkTarget(frontMatter["project"]);
     if (projectLinkPath === undefined) {
-        return fail(`Invalid project link: ${describeValue(frontMatter["frontMatter"])}`);
+        return fail(`Invalid project link: ${describeValue(frontMatter["project"])}`);
     }
     const status = frontMatter["status"];
     if (!isOneOf(TASK_STATUSES, status)) {
