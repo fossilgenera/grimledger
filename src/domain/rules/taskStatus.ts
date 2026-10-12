@@ -16,6 +16,11 @@ export function canChangeStatus(from: TaskStatus, to: TaskStatus): boolean {
     return TASK_TRANSITIONS[from].includes(to);
 }
 
+/** The statuses a task in status `from` may move to. Read-only view of the table. */
+export function allowedStatusChanges(from: TaskStatus): readonly TaskStatus[] {
+    return TASK_TRANSITIONS[from];
+}
+
 // Returns a new task, never mutates the input
 export function applyStatusChange(
     task: Task,

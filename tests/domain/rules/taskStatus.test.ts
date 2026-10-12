@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Task } from "../../../src/domain/models/task";
 import type { Result } from "../../../src/domain/result";
 import {
+  allowedStatusChanges,
   applyStatusChange,
   canChangeStatus,
 } from "../../../src/domain/rules/taskStatus";
@@ -128,5 +129,28 @@ describe("applyStatusChange", () => {
     });
     const updated = expectOk(applyStatusChange(task, "complete", TODAY));
     expect(updated).toEqual({ ...task, status: "complete", completed: TODAY });
+  });
+});
+
+describe("allowedStatusChanges", () => {
+  for (const from of TASK_STATUSES) {
+    it(`lists exactly the allowed targets from ${from}`, () => {
+      const expected = EXPECTED_ALLOWED.filter(([f]) => f === from).map(
+        ([, t]) => t,
+      );
+      expect([...allowedStatusChanges(from)].sort()).toEqual(
+        [...expected].sort(),
+      );
+    });
+  }
+
+  it("agrees with canChangeStatus for every pair", () => {
+    for (const from of TASK_STATUSES) {
+      for (const to of TASK_STATUSES) {
+        expect(allowedStatusChanges(from).includes(to)).toBe(
+          canChangeStatus(from, to),
+        );
+      }
+    }
   });
 });

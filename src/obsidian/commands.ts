@@ -2,14 +2,18 @@ import { Notice, Plugin, type App } from "obsidian";
 import { ClientRepository } from "../data/repositories/ClientRepository";
 import { ProjectRepository } from "../data/repositories/ProjectRepository";
 import type { TaskRepository } from "../data/repositories/TaskRepository";
+import type { Task } from "../domain/models/task";
+import { allowedStatusChanges } from "../domain/rules/taskStatus";
 import { labelTasks, type LabelledTask } from "../queries/labelTasks";
 import { openTasks } from "../queries/openTasks";
 import { projectsAcceptingTasks } from "../queries/projectsAcceptingTasks";
 import type { TaskService } from "../services/TaskService";
+import { ChangeStatusModal } from "../ui/modals/ChangeStatusModal";
 import { CompleteTaskModal } from "../ui/modals/CompleteTaskModal";
 import { CreateClientModal } from "../ui/modals/CreateClientModal";
 import { CreateProjectModal } from "../ui/modals/CreateProjectModal";
 import { CreateTaskModal } from "../ui/modals/CreateTaskModal";
+import { statusLabel } from "../ui/modals/statusLabel";
 import { TaskPickerModal } from "../ui/modals/TaskPickerModal";
 
 export interface Repositories {
@@ -22,21 +26,34 @@ export interface Services {
     tasks: TaskService;
 }
 
-/** Lists open tasks, lets the user pick one, then hands the choice to onChoose. */
-function pickOpenTask(
+/**
+ * Labels the given tasks, lets the user pick one, then hands the choice to onChoose.
+ * With showStatus, each label ends with the task's current status.
+ */
+function pickTask(
     app: App,
     repositories: Repositories,
+    tasks: readonly Task[],
+    emptyMessage: string,
     onChoose: (chosen: LabelledTask) => void,
+    showStatus = false,
 ): void {
-    const open = openTasks(repositories.tasks.list().items);
-    if (open.length === 0) {
-        new Notice("No open tasks.");
+    if (tasks.length === 0) {
+        new Notice(emptyMessage);
         return;
     }
     // All projects, not only those accepting tasks: a task inside a completed
     // project still needs its client label.
-    const labelled = labelTasks(open, repositories.projects.list().items);
-    new TaskPickerModal(app, labelled, onChoose).open();
+    const labelled = labelTasks(tasks, repositories.projects.list().items);
+    const choices = showStatus
+        ? labelled.map(
+              ({ task, label }): LabelledTask => ({
+                  task,
+                  label: `${label} (${statusLabel(task.status)})`,
+              }),
+          )
+        : labelled;
+    new TaskPickerModal(app, choices, onChoose).open();
 }
 
 export function registerCommands(
@@ -82,9 +99,40 @@ export function registerCommands(
         id: "complete-task",
         name: "Complete task",
         callback: () => {
-            pickOpenTask(plugin.app, repositories, (chosen) => {
-                new CompleteTaskModal(plugin.app, services.tasks, chosen).open();
-            });
+            pickTask(
+                plugin.app,
+                repositories,
+                openTasks(repositories.tasks.list().items),
+                "No open tasks.",
+                (chosen) => {
+                    new CompleteTaskModal(plugin.app, services.tasks, chosen).open();
+                },
+            );
+        },
+    });
+
+    plugin.addCommand({
+        id: "change-task-status",
+        name: "Change task status",
+        callback: () => {
+            pickTask(
+                plugin.app,
+                repositories,
+                repositories.tasks.list().items,
+                "No tasks.",
+                (chosen) => {
+                    // Completing goes through "Complete task", which records the outcome.
+                    const targets = allowedStatusChanges(chosen.task.status).filter(
+                        (status) => status !== "complete",
+                    );
+                    if (targets.length === 0) {
+                        new Notice("No status changes are available for this task.");
+                        return;
+                    }
+                    new ChangeStatusModal(plugin.app, services.tasks, chosen, targets).open();
+                },
+                true,
+            );
         },
     });
 }
