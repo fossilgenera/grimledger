@@ -14,7 +14,7 @@ export function taskFromFrontmatter(
     path: string,
     frontMatter: Frontmatter,
 ): Result<TaskRecord> {
-    if (frontMatter?.["type"] != "task") {
+    if (frontMatter?.["type"] !== "task") {
         return fail('Not a task note: "type" is not "task".');
     }
 
