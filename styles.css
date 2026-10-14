@@ -1,3 +1,75 @@
 .grimledger-dashboard {
     padding: 1rem;
+    max-width: 52rem;
+}
+
+.grimledger-date {
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+}
+
+.grimledger-section {
+    margin-bottom: 1.5rem;
+}
+
+.grimledger-section h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+}
+
+.grimledger-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.grimledger-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.4rem;
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+}
+
+.grimledger-row-main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.grimledger-row-name {
+    color: var(--text-normal);
+}
+
+.grimledger-row-context {
+    color: var(--text-muted);
+    font-size: 0.85em
+}
+
+.grimledger-row-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.grimledger-priority {
+    color: var(--text-accent);
+}
+
+.grimledger-due {
+    color: var(--text-accent);
+}
+
+.grimledger-empty {
+    color: var(--text-muted);
+}
+
+.grimledger-footnote {
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin-top: 2rem;
 }
