@@ -15,6 +15,10 @@ const context = await esbuild.context({
   ],
   format: "cjs",
   target: "es2020",
+  jsx: "automatic",
+  define: {
+    "process.env.NODE_ENV": production ? '"production"' : '"development"',
+  },
   logLevel: "info",
   sourcemap: production ? false : "inline",
   treeShaking: true,
