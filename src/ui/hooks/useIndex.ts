@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
-import { IndexSnapshot } from "../../data/index/buildIndex";
-import { IndexStore } from "../../data/index/IndexStore";
+import type { IndexSnapshot } from "../../data/index/buildIndex";
+import type { IndexStore } from "../../data/index/IndexStore";
 
 /**
  * Returns the current index snapshot and re-renders the component whenever the 

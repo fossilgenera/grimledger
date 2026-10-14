@@ -57,3 +57,11 @@ export function addDays(date: IsoDate, days: number): IsoDate {
   const day = String(shifted.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Whole calendar days from `from` to `to`. Positive when `to` is later,
+ * negative when it is earlier. Throws if either date is invalid.
+ */
+export function daysBetween(from: IsoDate, to: IsoDate): number {
+  return (utcMillisOf(to) - utcMillisOf(from)) / MS_PER_DAY;
+}
