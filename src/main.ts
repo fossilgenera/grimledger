@@ -14,9 +14,9 @@ export default class GrimledgerPlugin extends Plugin {
     const store = new IndexStore();
     const indexer = new VaultIndexer(this.app, store);
 
-    const clients = new VaultClientRepository(this.app);
-    const projects = new VaultProjectRepository(this.app);
-    const tasks = new VaultTaskRepository(this.app);
+    const clients = new VaultClientRepository(this.app, store);
+    const projects = new VaultProjectRepository(this.app, store);
+    const tasks = new VaultTaskRepository(this.app, store);
 
     const taskService = new TaskService(tasks, () => formatIsoDate(new Date()));
 

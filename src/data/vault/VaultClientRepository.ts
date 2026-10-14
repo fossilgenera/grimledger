@@ -1,32 +1,21 @@
-import { App } from "obsidian";
-import { ClientRepository } from "../repositories/ClientRepository";
-import { ListResult, SkippedNote } from "../repositories/ListResult";
-import { Client } from "../../domain/models/client";
-import { clientFromFrontMatter, clientToFrontMatter } from "../mapping/clientMapper";
-import { fail, Result, ok } from "../../domain/result";
+import type { App } from "obsidian";
+import type { ClientRepository } from "../repositories/ClientRepository";
+import { copyListResult, type ListResult } from "../repositories/ListResult";
+import type { Client } from "../../domain/models/client";
+import { clientToFrontMatter } from "../mapping/clientMapper";
+import { fail, ok, type Result } from "../../domain/result";
 import { clientFolderPath, clientNotePath, noteNameOf, validateEntityName } from "../VaultLayout";
+import type { IndexStore } from "../index/IndexStore";
 import { ensureFolder } from "./ensureFolder";
 
 export class VaultClientRepository implements ClientRepository {
-    constructor(private readonly app: App) {}
+    constructor(
+        private readonly app: App,
+        private readonly store: IndexStore,
+    ) {}
 
     list(): ListResult<Client> {
-        const items: Client[] = [];
-        const skipped: SkippedNote[] = [];
-
-        for (const file of this.app.vault.getMarkdownFiles()) {
-            const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-            if (frontmatter?.["type"] !== "client") {
-                continue;
-            }
-            const result = clientFromFrontMatter(file.path, frontmatter);
-            if (result.ok) {
-                items.push(result.value);
-            } else {
-                skipped.push({ path: file.path, reason: result.reason });
-            }
-        }
-        return { items, skipped };
+        return copyListResult(this.store.snapshot.clients);
     }
 
     async create(name: string): Promise<Result<Client>> {

@@ -11,20 +11,7 @@ export class VaultIndexer {
     ) {}
 
     rebuild(): void {
-        const started = performance.now();
-
         const notes = readNoteSnapshots(this.app);
-        const snapshot = buildIndex(notes, makeLinkResolver(this.app));
-        this.store.replace(snapshot);
-
-        // Temporary: remove after Milestone 4c
-        const ms = (performance.now() - started).toFixed(1);
-        const { clients, projects, tasks } = snapshot;
-        console.log(
-        `Grimledger: index rebuilt in ${ms} ms from ${notes.length} notes. ` +
-            `clients ${clients.items.length}/${clients.skipped.length} skipped, ` +
-            `projects ${projects.items.length}/${projects.skipped.length} skipped, ` +
-            `tasks ${tasks.items.length}/${tasks.skipped.length} skipped`,
-        );
+        this.store.replace(buildIndex(notes, makeLinkResolver(this.app)));
     }
 }

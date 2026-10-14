@@ -8,56 +8,23 @@ import {
   folderOf,
 } from "../VaultLayout";
 import { fail, ok, type Result } from "../../domain/result";
-import { projectFromFrontmatter, projectToFrontmatter } from "../mapping/projectMapper";
+import { projectToFrontmatter } from "../mapping/projectMapper";
 import { parseWikilinkTarget } from "../mapping/wikilink";
-import type { ListResult, SkippedNote } from "../repositories/ListResult";
+import { copyListResult, type ListResult } from "../repositories/ListResult";
 import type { NewProjectInput, ProjectRepository } from "../repositories/ProjectRepository";
+import type { IndexStore } from "../index/IndexStore";
 import { ensureFolder } from "./ensureFolder";
 
 const WIKILINK_HELP = 'Obsidian is not generating wikilinks. Turn on settings > Files and links > "Use [[Wikilinks]]", then try again.';
 
 export class VaultProjectRepository implements ProjectRepository {
-    constructor(private readonly app: App) {}
+    constructor(
+        private readonly app: App,
+        private readonly store: IndexStore,
+    ) {}
 
     list(): ListResult<Project> {
-        const items: Project[] = [];
-        const skipped: SkippedNote[] = [];
-
-        for (const file of this.app.vault.getMarkdownFiles()) {
-            const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
-            if (frontmatter?.["type"] !== "project") {
-                continue;
-            }
-
-            const mapped = projectFromFrontmatter(file.path, frontmatter);
-            if (!mapped.ok) {
-                skipped.push({ path: file.path, reason: mapped.reason });
-                continue;
-            }
-
-            const { clientLinkPath, ...rest } = mapped.value;
-            const clientFile = this.app.metadataCache.getFirstLinkpathDest(clientLinkPath, file.path);
-            if (clientFile === null) {
-                skipped.push({ path: file.path, reason: `Client link target "${clientLinkPath}" does not resolve to a note.` });
-                continue;
-            }
-
-            const clientFrontmatter = this.app.metadataCache.getFileCache(clientFile)?.frontmatter;
-            if (clientFrontmatter?.["type"] !== "client") {
-                skipped.push({
-                    path: file.path,
-                    reason: `Client link points to "${clientFile.path}, which is not a client note."`
-                });
-                continue;
-            }
-
-            items.push({
-                ...rest,
-                client: { path: clientFile.path, name: noteNameOf(clientFile.path) },
-            });
-        }
-
-        return { items, skipped };
+        return copyListResult(this.store.snapshot.projects);
     }
 
     async create(input: NewProjectInput): Promise<Result<Project>> {
