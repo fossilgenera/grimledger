@@ -73,3 +73,18 @@
     font-size: 0.85em;
     margin-top: 2rem;
 }
+
+.grimledger-client {
+    margin-bottom: 1rem;
+}
+
+.grimledger-client h4 {
+    margin: 0 0 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.grimledger-remaining {
+    color: var(--text-accent);
+}
