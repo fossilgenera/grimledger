@@ -9,6 +9,7 @@ import { IndexStore } from "./data/index/IndexStore";
 import { VaultIndexer } from "./data/vault/VaultIndexer";
 import { registerIndexEvents } from "./obsidian/events";
 import { registerDashboard } from "./obsidian/dashboard";
+import { ProjectService } from "./services/ProjectService";
 
 export default class GrimledgerPlugin extends Plugin {
   override async onload(): Promise<void> {
@@ -22,8 +23,12 @@ export default class GrimledgerPlugin extends Plugin {
     const today = () => formatIsoDate(new Date());
 
     const taskService = new TaskService(tasks, today);
+    const projectService = new ProjectService(projects);
 
-    registerCommands(this, { clients, projects, tasks }, { tasks: taskService });
+    registerCommands(
+      this,
+      { clients, projects, tasks },
+      { tasks: taskService, projects: projectService });
     registerDashboard(this, store, today);
     registerIndexEvents(this, () => indexer.rebuild());
   }

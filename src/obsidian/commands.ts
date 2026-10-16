@@ -15,6 +15,9 @@ import { CreateProjectModal } from "../ui/modals/CreateProjectModal";
 import { CreateTaskModal } from "../ui/modals/CreateTaskModal";
 import { statusLabel } from "../ui/modals/statusLabel";
 import { TaskPickerModal } from "../ui/modals/TaskPickerModal";
+import type { ProjectService } from "../services/ProjectService";
+import { focusCandidates, type FocusCandidate } from "../queries/focusCandidates";
+import { ProjectPickerModal } from "../ui/modals/ProjectPickerModal";
 
 export interface Repositories {
     clients: ClientRepository;
@@ -24,6 +27,7 @@ export interface Repositories {
 
 export interface Services {
     tasks: TaskService;
+    projects: ProjectService;
 }
 
 /**
@@ -54,6 +58,22 @@ function pickTask(
           )
         : labelled;
     new TaskPickerModal(app, choices, onChoose).open();
+}
+
+/** Flips the chosen project's current-focus flag and tells the user what happened. */
+async function toggleCurrentFocus(
+    services: Services,
+    chosen: FocusCandidate,
+): Promise<void> {
+    const target = !chosen.project.currentFocus;
+    const result = await services.projects.setCurrentFocus(chosen.project.path, target);
+    if (!result.ok) {
+        new Notice(result.reason);
+        return;
+    }
+    new Notice(
+        `${result.value.name} is ${target ? "now"  : "no longer"} current focus.`,
+    );
 }
 
 export function registerCommands(
@@ -135,4 +155,22 @@ export function registerCommands(
             );
         },
     });
+
+    plugin.addCommand({
+        id: "toggle-project-current-focus",
+        name: "Toggle project current focus",
+        callback: () => {
+            const candidates = focusCandidates(repositories.projects.list().items);
+            if (candidates.length === 0) {
+                new Notice("No active projects.");
+                return;
+            }
+            new ProjectPickerModal(plugin.app, candidates, (chosen) => {
+                toggleCurrentFocus(services, chosen).catch((error: unknown) => {
+                    console.error("Grimledger: could not change current focus", error);
+                    new Notice("Could not change current focus. See the developer console.");
+                });
+            }).open();
+        }
+    })
 }
