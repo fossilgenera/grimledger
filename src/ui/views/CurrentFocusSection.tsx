@@ -1,12 +1,13 @@
-import { ProjectOverview } from "../../queries/projectOverview";
+import type { ProjectOverview } from "../../queries/projectOverview";
 import { ProjectRow } from "./ProjectRow";
 
 interface CurrentFocusSectionProps {
     rows: readonly ProjectOverview[];
+    onOpen: (path: string) => void;
 }
 
 /** Projects marked as current focus. Never hidden: shows an invitation when empty. */
-export function CurrentFocusSection({ rows }: CurrentFocusSectionProps) {
+export function CurrentFocusSection({ rows, onOpen }: CurrentFocusSectionProps) {
     return (
         <section className="grimledger-section">
             <h3>Current Focus</h3>
@@ -21,6 +22,7 @@ export function CurrentFocusSection({ rows }: CurrentFocusSectionProps) {
                             key={overview.project.path}
                             overview={overview}
                             context={overview.project.client.name}
+                            onOpen={onOpen}
                         />
                     ))}
                 </ul>

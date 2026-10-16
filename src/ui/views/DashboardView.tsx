@@ -1,4 +1,4 @@
-import { ItemView, type WorkspaceLeaf } from "obsidian";
+import { ItemView, Notice, type WorkspaceLeaf } from "obsidian";
 import { createRoot, type Root } from "react-dom/client";
 import type { IndexStore } from "../../data/index/IndexStore";
 import type { IsoDate } from "../../domain/types";
@@ -29,9 +29,21 @@ export class DashboardView extends ItemView {
     return "Grimledger dashboard";
   }
 
+  private readonly openNote = (path: string): void => {
+    this.app.workspace.openLinkText(path, "", "tab").catch((error: unknown) => {
+      console.error("Grimledger: could not open note", path, error);
+      new Notice(`Could not open "${path}". See the developer console.`);
+    })
+  }
+
   override async onOpen(): Promise<void> {
     this.root = createRoot(this.contentEl);
-    this.root.render(<DashboardApp store={this.store} today={this.today} />);
+    this.root.render(
+      <DashboardApp
+        store={this.store}
+        today={this.today}
+        openNote={this.openNote}
+      />);
   }
 
   override async onClose(): Promise<void> {

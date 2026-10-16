@@ -9,19 +9,18 @@ import { useIndex } from "../hooks/useIndex";
 import { useToday } from "../hooks/useToday";
 import { ActiveProjectsSection } from "./ActiveProjectsSection";
 import { CurrentFocusSection } from "./CurrentFocusSection";
+import { collectSkipped } from "./skippedNotes";
+import { SkippedNotesList } from "./SkippedNotesList";
 import { TaskSection } from "./TaskSection";
 
 interface DashboardAppProps {
   store: IndexStore;
   today: () => IsoDate;
+  /** Opens the note at this vault path. Supplied by the Obsidian side. */
+  openNote: (path: string) => void;
 }
 
-/**
- * Section order (decision M4e-2): current focus, overdue, due today, blocked,
- * upcoming, active projects by client.
- * The counts at the bottom stay until the skipped-notes indicator in 4f.
- */
-export function DashboardApp({ store, today }: DashboardAppProps) {
+export function DashboardApp({ store, today, openNote }: DashboardAppProps) {
   const index = useIndex(store);
   const date = useToday(today);
 
@@ -30,32 +29,26 @@ export function DashboardApp({ store, today }: DashboardAppProps) {
   const focus = currentFocusProjects(projects, tasks);
   const groups = activeProjectsByClient(projects, tasks);
   const sections = taskSections(tasks, projects, date);
-  const skipped =
-    index.clients.skipped.length +
-    index.projects.skipped.length +
-    index.tasks.skipped.length;
+  const skipped = collectSkipped(index);
 
   return (
     <div className="grimledger-dashboard">
       <h2>Grimledger</h2>
       <p className="grimledger-date">{date}</p>
 
-      <CurrentFocusSection rows={focus} />
+      <CurrentFocusSection rows={focus} onOpen={openNote} />
 
       {hasNoTasks(sections) && (
         <p className="grimledger-empty">Nothing needs attention.</p>
       )}
-      <TaskSection title="Overdue" rows={sections.overdue} today={date} />
-      <TaskSection title="Due today" rows={sections.dueToday} today={date} />
-      <TaskSection title="Blocked" rows={sections.blocked} today={date} />
-      <TaskSection title="Upcoming" rows={sections.upcoming} today={date} />
+      <TaskSection title="Overdue" rows={sections.overdue} today={date} onOpen={openNote} />
+      <TaskSection title="Due today" rows={sections.dueToday} today={date} onOpen={openNote} />
+      <TaskSection title="Blocked" rows={sections.blocked} today={date} onOpen={openNote} />
+      <TaskSection title="Upcoming" rows={sections.upcoming} today={date} onOpen={openNote} />
 
-      <ActiveProjectsSection groups={groups} />
+      <ActiveProjectsSection groups={groups} onOpen={openNote} />
 
-      <p className="grimledger-footnote">
-        Clients {index.clients.items.length}, projects {index.projects.items.length},
-        tasks {index.tasks.items.length}, skipped notes {skipped}
-      </p>
+      <SkippedNotesList entries={skipped} onOpen={openNote} />
     </div>
   );
 }

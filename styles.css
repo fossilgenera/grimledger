@@ -88,3 +88,39 @@
 .grimledger-remaining {
     color: var(--text-accent);
 }
+
+.grimledger-link {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    height: auto;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    cursor: inherit;
+}
+.grimledger-link:hover {
+    color: var(--text-accent);
+    text-decoration: underline;
+}
+
+.grimledger-skipped {
+    margin-top: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.grimledger-skipped summary {
+    cursor: pointer;
+}
+
+.grimledger-skipped-item {
+    margin: 0.5rem 0;
+}
+
+.grimledger-skipped-reason {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85em;
+}
