@@ -72,3 +72,24 @@ export function projectToFrontmatter(input: ProjectWriteInput): Record<string, u
     }
     return result;
 }
+
+/** The fields that can change after a project has been created. */
+export interface ProjectMutableFields {
+  status: Project["status"];
+  priority: Project["priority"];
+  currentFocus: boolean;
+}
+
+/**
+ * Only the mutable fields. Never writes type, client or start_date, so it cannot clear an 
+ * existing start date.
+ */
+export function projectMutableToFrontmatter(
+  fields: ProjectMutableFields,
+): Record<string, unknown> {
+  return {
+    status: fields.status,
+    priority: fields.priority,
+    current_focus: fields.currentFocus,
+  }
+}

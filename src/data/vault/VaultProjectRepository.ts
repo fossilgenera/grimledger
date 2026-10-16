@@ -8,7 +8,7 @@ import {
   folderOf,
 } from "../VaultLayout";
 import { fail, ok, type Result } from "../../domain/result";
-import { projectToFrontmatter } from "../mapping/projectMapper";
+import { projectMutableToFrontmatter, projectToFrontmatter } from "../mapping/projectMapper";
 import { parseWikilinkTarget } from "../mapping/wikilink";
 import { copyListResult, type ListResult } from "../repositories/ListResult";
 import type { NewProjectInput, ProjectRepository } from "../repositories/ProjectRepository";
@@ -85,5 +85,18 @@ export class VaultProjectRepository implements ProjectRepository {
             startDate,
             currentFocus
         });
+    }
+
+    async update(project: Project): Promise<Result<Project>> {
+        const file = this.app.vault.getFileByPath(project.path);
+        if (file === null) {
+            return fail(`Project note "${project.path}" does not exist.`);
+        }
+
+        await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+            Object.assign(frontmatter, projectMutableToFrontmatter(project));
+        })
+
+        return ok(project);
     }
 }
