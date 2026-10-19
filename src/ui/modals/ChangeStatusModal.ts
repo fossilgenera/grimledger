@@ -40,18 +40,21 @@ export class ChangeStatusModal extends Modal {
         });
 
         this.errorEl = this.contentEl.createDiv();
-        this.errorEl.style.color = "var(--text-error)";
+        this.errorEl.classList.add("grimledger-error");
 
-        new Setting(this.contentEl).addButton((button) => 
+        new Setting(this.contentEl).addButton((button) =>
             button
                 .setButtonText("Change")
-            .setCta()
-            .onClick(() => {
-                void this.submit();
-            }),
+                .setCta()
+                .onClick(() => {
+                    void this.submit();
+                }),
         );
     }
 
+    override onClose(): void {
+        this.contentEl.empty();
+    }
 
     /** Prevents form bug from failing silently. */
     private showError(message: string): void {
@@ -62,8 +65,11 @@ export class ChangeStatusModal extends Modal {
     }
 
     private async submit(): Promise<void> {
-        if (this.submitting) {return;}
+        if (this.submitting) {
+            return;
+        }
 
+        this.submitting = true;
         try {
             // Pass the path not the task object
             const result = await this.tasks.changeTaskStatus(
@@ -75,7 +81,7 @@ export class ChangeStatusModal extends Modal {
                 return;
             }
             this.close();
-            new Notice(`"${result.value.name}" is not ${statusLabel(result.value.status).toLowerCase()}`);
+            new Notice(`"${result.value.name}" is now ${statusLabel(result.value.status).toLowerCase()}`);
         } catch (error) {
             console.error("Grimledger: failed to change task status", error);
             this.showError("Unexpected error. See the developer console (Ctrl+Shift+I).");

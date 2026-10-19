@@ -81,7 +81,7 @@ export class CreateProjectModal extends Modal {
     });
 
     this.errorEl = this.contentEl.createDiv();
-    this.errorEl.style.color = "var(--text-error)";
+    this.errorEl.classList.add("grimledger-error");
 
     new Setting(this.contentEl).addButton((button) =>
       button
@@ -98,9 +98,10 @@ export class CreateProjectModal extends Modal {
   }
 
   private showError(message: string): void {
-    if (this.errorEl) {
-      this.errorEl.textContent = message;
+    if (this.errorEl === undefined) {
+      throw new Error("CreateProjectModal: the error element was never created");
     }
+    this.errorEl.textContent = message;
   }
 
   private async submit(): Promise<void> {

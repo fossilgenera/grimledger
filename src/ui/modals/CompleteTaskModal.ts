@@ -35,7 +35,7 @@ export class CompleteTaskModal extends Modal {
             });
 
         this.errorEl = this.contentEl.createDiv();
-        this.errorEl.style.color = "var(--text-error)";
+        this.errorEl.classList.add("grimledger-error");
 
         new Setting(this.contentEl).addButton((button) =>
             button

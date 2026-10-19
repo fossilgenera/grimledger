@@ -68,12 +68,6 @@
     color: var(--text-muted);
 }
 
-.grimledger-footnote {
-    color: var(--text-muted);
-    font-size: 0.85em;
-    margin-top: 2rem;
-}
-
 .grimledger-client {
     margin-bottom: 1rem;
 }
@@ -123,4 +117,8 @@
     display: block;
     color: var(--text-muted);
     font-size: 0.85em;
+}
+
+.grimledger-error {
+    color: var(--text-error);
 }
