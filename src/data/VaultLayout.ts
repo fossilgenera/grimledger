@@ -3,6 +3,7 @@ export const WORK_ROOT = "Work";
 const CLIENTS_FOLDER = `${WORK_ROOT}/Clients`;
 const PROJECTS_SEGMENT = "Projects";
 const TASKS_SEGMENT = "Tasks";
+const SESSIONS_SEGMENT = "Work Sessions";
 
 const FORBIDDEN_CHARS = /[\\/:*?"<>|#^[\]]/;
 
@@ -82,6 +83,14 @@ export function taskFolderPath(projectNote: string): string {
 
 export function taskNotePath(projectNote: string, taskName: string): string {
   return `${taskFolderPath(projectNote)}/${safeName(taskName)}.md`;
+}
+
+export function sessionFolderPath(projectNote: string): string {
+  return `${requireFolderOf(projectNote)}/${SESSIONS_SEGMENT}`;
+}
+
+export function sessionNotePath(projectNote: string, sessionName: string): string {
+  return `${sessionFolderPath(projectNote)}/${safeName(sessionName)}.md`;
 }
 
 /** "Work/Clients/ABC Bank/ABC Bank.md" returns "ABC Bank". */

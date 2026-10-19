@@ -103,3 +103,18 @@ export function readOptionalText(
   }
   return fail(`Invalid ${fieldName}: ${describeValue(value)}, expected text`);
 }
+
+/** Missing or empty is a failure. Present but not a positive whole number is a failure. */
+export function readRequiredPositiveInteger(
+  value: unknown,
+  fieldName: string,
+): Result<number> {
+  const result = readOptionalPositiveInteger(value, fieldName);
+  if (!result.ok) {
+    return result;
+  }
+  if (result.value === undefined) {
+    return fail(`${fieldName}: missing`);
+  }
+  return ok(result.value);
+}
