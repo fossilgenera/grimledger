@@ -131,7 +131,7 @@ export class CreateProjectModal extends Modal {
       }
       this.close();
       new Notice(`Created project "${result.value.name}"`);
-      await this.app.workspace.openLinkText(result.value.path, "");
+      await this.app.workspace.openLinkText(result.value.path, "", "tab");
     } catch (error) {
       console.error("Grimledger: failed to create project", error);
       this.showError("Unexpected error. See the developer console (Ctrl+Shift+I).");

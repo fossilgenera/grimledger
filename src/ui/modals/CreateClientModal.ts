@@ -65,7 +65,7 @@ export class CreateClientModal extends Modal {
       }
       this.close();
       new Notice(`Created client "${result.value.name}"`);
-      await this.app.workspace.openLinkText(result.value.path, "");
+      await this.app.workspace.openLinkText(result.value.path, "", "tab");
     } catch (error) {
       console.error("Grimledger: failed to create client", error);
       this.showError("Unexpected error. See the developer console (Ctrl+Shift+I).");
