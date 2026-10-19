@@ -1,11 +1,13 @@
 import { Client } from "../../domain/models/client";
 import { Project } from "../../domain/models/project";
 import { Task } from "../../domain/models/task";
+import type { WorkSession } from "../../domain/models/workSession";
 import { fail, ok, Result } from "../../domain/result";
 import { EntityRef } from "../../domain/types";
 import { clientFromFrontMatter } from "../mapping/clientMapper";
 import { projectFromFrontmatter } from "../mapping/projectMapper";
 import { taskFromFrontmatter } from "../mapping/taskMapper";
+import { workSessionFromFrontmatter } from "../mapping/workSessionMapper";
 import { ListResult } from "../repositories/ListResult";
 import { noteNameOf } from "../VaultLayout";
 
@@ -28,12 +30,14 @@ export interface IndexSnapshot {
     clients: ListResult<Client>;
     projects: ListResult<Project>;
     tasks: ListResult<Task>;
+    workSessions: ListResult<WorkSession>;
 }
 
 export const EMPTY_INDEX: IndexSnapshot = {
     clients: { items: [], skipped: [] },
     projects: { items: [], skipped: [] },
     tasks: { items: [], skipped: [] },
+    workSessions: { items: [], skipped: [] },
 };
 
 function comparePath(a: string, b: string): number {
@@ -42,6 +46,8 @@ function comparePath(a: string, b: string): number {
     return 0;
 }
 
+type ReferenceType = "client" | "project" | "task";
+
 /**
  * Resolves a link and checks the target note claims the expected type.
  * Only the target's `type` is checked, not whether it passed validation.
@@ -49,11 +55,11 @@ function comparePath(a: string, b: string): number {
 function resolveReference(
     linkPath: string,
     sourcePath: string,
-    expectedType: "client" | "project",
+    expectedType: ReferenceType,
     resolveLink: LinkResolver,
     typeByPath: Readonly<Map<string, unknown>>,
 ): Result<EntityRef> {
-    const label = expectedType === "client" ? "Client" : "Project";
+    const label = expectedType.charAt(0).toUpperCase() + expectedType.slice(1);
 
     const targetPath = resolveLink(linkPath, sourcePath);
     if (targetPath === undefined) {
@@ -89,6 +95,7 @@ export function buildIndex(
     const clients: ListResult<Client> = { items: [], skipped: [] };
     const projects: ListResult<Project> = { items: [], skipped: [] };
     const tasks: ListResult<Task> = { items: [], skipped: [] };
+    const workSessions: ListResult<WorkSession> = { items: [], skipped: [] };
 
     // Pass 2: Map every note that claims one of our types.
     for (const note of sorted) {
@@ -144,6 +151,29 @@ export function buildIndex(
                     break;
                 }
                 tasks.items.push({ ...rest, project: project.value });
+                break;
+            }
+
+            case "work_session": {
+                const mapped = workSessionFromFrontmatter(note.path, note.frontmatter);
+                if (!mapped.ok) {
+                    workSessions.skipped.push({ path: note.path, reason: mapped.reason });
+                    break;
+                }
+                const { taskLinkPath, ...rest } = mapped.value;
+                const task = resolveReference(
+                    taskLinkPath,
+                    note.path,
+                    "task",
+                    resolveLink,
+                    typeByPath,
+                );
+                if (!task.ok) {
+                    workSessions.skipped.push({ path: note.path, reason: task.reason });
+                    break;
+                }
+                workSessions.items.push({ ...rest, task: task.value });
+                break;
             }
 
             default:
@@ -152,5 +182,5 @@ export function buildIndex(
         }
     }
 
-    return { clients, projects, tasks };
+    return { clients, projects, tasks, workSessions };
 }

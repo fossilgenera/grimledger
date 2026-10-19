@@ -81,6 +81,7 @@ describe("buildIndex: mapping", () => {
       clients: EMPTY,
       projects: EMPTY,
       tasks: EMPTY,
+      workSessions: EMPTY,
     });
   });
 
@@ -149,6 +150,7 @@ describe("buildIndex: mapping", () => {
       clients: EMPTY,
       projects: EMPTY,
       tasks: EMPTY,
+      workSessions: EMPTY,
     });
   });
 });
