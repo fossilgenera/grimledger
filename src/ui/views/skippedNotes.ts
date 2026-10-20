@@ -1,7 +1,7 @@
 import type { IndexSnapshot } from "../../data/index/buildIndex";
 import type { SkippedNote } from "../../data/repositories/ListResult";
 
-export type SkippedKind = "client" | "project" | "task";
+export type SkippedKind = "client" | "project" | "task" | "work session";
 
 export interface SkippedEntry extends SkippedNote {
     kind: SkippedKind;
@@ -20,6 +20,7 @@ export function collectSkipped(index: IndexSnapshot): SkippedEntry[] {
         ...withKind(index.clients.skipped, "client"),
         ...withKind(index.projects.skipped, "project"),
         ...withKind(index.tasks.skipped, "task"),
+        ...withKind(index.workSessions.skipped, "work session"),
     ].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 
