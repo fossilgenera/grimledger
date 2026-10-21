@@ -22,7 +22,10 @@ export const TASK_STATUSES = [
   "cancelled",
 ] as const;
 
+export const RECURRENCE_UNITS = ["day", "week", "month"] as const;
+
 export type ClientStatus = (typeof CLIENT_STATUSES)[number];
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 export type Priority = (typeof PRIORITIES)[number];
 export type TaskStatus = (typeof TASK_STATUSES)[number];
+export type RecurrenceUnit = (typeof RECURRENCE_UNITS)[number];
