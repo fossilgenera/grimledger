@@ -5,7 +5,8 @@ import {
   taskToFrontmatter,
 } from "../../../src/data/mapping/taskMapper";
 
-const PATH = "Work/Clients/ABC Bank/Projects/MRI Reporting/Tasks/Fix mapping.md";
+const PATH =
+  "Work/Clients/ABC Bank/Projects/MRI Reporting/Tasks/Fix mapping.md";
 
 function validFrontmatter(
   overrides: Record<string, unknown> = {},
@@ -70,7 +71,10 @@ describe("taskFromFrontmatter: valid input", () => {
   });
 
   it("treats a whitespace-only outcome as undefined", () => {
-    const result = taskFromFrontmatter(PATH, validFrontmatter({ outcome: "   " }));
+    const result = taskFromFrontmatter(
+      PATH,
+      validFrontmatter({ outcome: "   " }),
+    );
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.value.outcome).toBeUndefined();
@@ -129,9 +133,9 @@ describe("taskFromFrontmatter: rejected input", () => {
   it.each([[0], [-5], [1.5], ["120"]])(
     "rejects estimated_minutes %j",
     (value) => {
-      expect(reasonOf(validFrontmatter({ estimated_minutes: value }))).toContain(
-        "estimated_minutes",
-      );
+      expect(
+        reasonOf(validFrontmatter({ estimated_minutes: value })),
+      ).toContain("estimated_minutes");
     },
   );
 
@@ -150,6 +154,111 @@ describe("taskFromFrontmatter: rejected input", () => {
   });
 });
 
+const NO_BLOCKER = {
+  blockedSince: undefined,
+  blockedBy: undefined,
+  waitingOn: undefined,
+  expectedResolution: undefined,
+};
+
+describe("taskFromFrontmatter: blocked fields", () => {
+  it("reads the blocked fields", () => {
+    const result = taskFromFrontmatter(
+      PATH,
+      validFrontmatter({
+        status: "blocked",
+        blocked_since: "2026-10-04",
+        blocked_by: " Client ",
+        waiting_on: "Production credentials",
+        expected_resolution: "2026-10-07",
+      }),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.blockedSince).toBe("2026-10-04");
+      expect(result.value.blockedBy).toBe("Client");
+      expect(result.value.waitingOn).toBe("Production credentials");
+      expect(result.value.expectedResolution).toBe("2026-10-07");
+    }
+  });
+
+  it("accepts a blocked task with no blocked fields", () => {
+    const result = taskFromFrontmatter(
+      PATH,
+      validFrontmatter({ status: "blocked" }),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.blockedSince).toBeUndefined();
+      expect(result.value.waitingOn).toBeUndefined();
+    }
+  });
+
+  it.each([
+    ["blocked_since", "yesterday"],
+    ["expected_resolution", "2026-02-30"],
+    ["blocked_by", 5],
+    ["waiting_on", 5],
+  ])("rejects an invalid %s", (key, value) => {
+    expect(reasonOf(validFrontmatter({ [key]: value }))).toContain(key);
+  });
+});
+
+describe("taskFromFrontmatter: recurrence", () => {
+  it("reads a recurrence", () => {
+    const result = taskFromFrontmatter(
+      PATH,
+      validFrontmatter({ recurrence_unit: "week", recurrence_every: 2 }),
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.recurrence).toEqual({ unit: "week", every: 2 });
+    }
+  });
+
+  it("treats missing and null recurrence keys as no recurrence", () => {
+    const missing = taskFromFrontmatter(PATH, validFrontmatter());
+    const empty = taskFromFrontmatter(
+      PATH,
+      validFrontmatter({ recurrence_unit: null, recurrence_every: null }),
+    );
+    for (const result of [missing, empty]) {
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value.recurrence).toBeUndefined();
+      }
+    }
+  });
+
+  it("rejects a recurrence with only one of the two keys", () => {
+    expect(reasonOf(validFrontmatter({ recurrence_unit: "week" }))).toContain(
+      "recurrence",
+    );
+    expect(reasonOf(validFrontmatter({ recurrence_every: 2 }))).toContain(
+      "recurrence",
+    );
+  });
+
+  it("rejects an unknown unit", () => {
+    expect(
+      reasonOf(
+        validFrontmatter({ recurrence_unit: "year", recurrence_every: 1 }),
+      ),
+    ).toContain("recurrence");
+  });
+
+  it.each([[0], [-1], [1.5], ["2"], [1000]])(
+    "rejects recurrence_every %j",
+    (value) => {
+      expect(
+        reasonOf(
+          validFrontmatter({ recurrence_unit: "day", recurrence_every: value }),
+        ),
+      ).toContain("recurrence");
+    },
+  );
+});
+
 describe("taskToFrontmatter", () => {
   const input = {
     projectLink: "[[MRI Reporting]]",
@@ -160,6 +269,8 @@ describe("taskToFrontmatter", () => {
     created: "2026-10-05",
     completed: undefined,
     outcome: undefined,
+    ...NO_BLOCKER,
+    recurrence: undefined,
   };
 
   it("writes every owned key, using null for absent values", () => {
@@ -173,6 +284,32 @@ describe("taskToFrontmatter", () => {
       estimated_minutes: null,
       completed: null,
       outcome: null,
+      blocked_since: null,
+      blocked_by: null,
+      waiting_on: null,
+      expected_resolution: null,
+      recurrence_unit: null,
+      recurrence_every: null,
+    });
+  });
+
+  it("writes the blocked fields and the recurrence", () => {
+    const written = taskToFrontmatter({
+      ...input,
+      status: "blocked",
+      blockedSince: "2026-10-04",
+      blockedBy: "Client",
+      waitingOn: "Production credentials",
+      expectedResolution: "2026-10-07",
+      recurrence: { unit: "week", every: 2 },
+    });
+    expect(written).toMatchObject({
+      blocked_since: "2026-10-04",
+      blocked_by: "Client",
+      waiting_on: "Production credentials",
+      expected_resolution: "2026-10-07",
+      recurrence_unit: "week",
+      recurrence_every: 2,
     });
   });
 
@@ -202,37 +339,75 @@ describe("taskToFrontmatter", () => {
       },
     });
   });
+
+  it("round trips blocked fields and recurrence", () => {
+    const written = taskToFrontmatter({
+      ...input,
+      status: "blocked",
+      due: "2026-10-06",
+      blockedSince: "2026-10-04",
+      blockedBy: "Client",
+      waitingOn: "Credentials",
+      expectedResolution: "2026-10-07",
+      recurrence: { unit: "month", every: 3 },
+    });
+    const result = taskFromFrontmatter(PATH, written);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.blockedSince).toBe("2026-10-04");
+      expect(result.value.blockedBy).toBe("Client");
+      expect(result.value.waitingOn).toBe("Credentials");
+      expect(result.value.expectedResolution).toBe("2026-10-07");
+      expect(result.value.recurrence).toEqual({ unit: "month", every: 3 });
+    }
+  });
 });
 
 describe("taskMutableToFrontmatter", () => {
-  it("does not include type, project or created", () => {
-    const written = taskMutableToFrontmatter({
-      status: "in-progress",
-      priority: "high",
-      due: undefined,
-      estimatedMinutes: undefined,
-      completed: undefined,
-      outcome: undefined,
-    });
-    expect(Object.keys(written).sort()).toEqual([
+  const blank = {
+    status: "in-progress" as const,
+    priority: "high" as const,
+    due: undefined,
+    estimatedMinutes: undefined,
+    completed: undefined,
+    outcome: undefined,
+    ...NO_BLOCKER,
+  };
+
+  it("does not include type, project, created or recurrence", () => {
+    expect(Object.keys(taskMutableToFrontmatter(blank)).sort()).toEqual([
+      "blocked_by",
+      "blocked_since",
       "completed",
       "due",
       "estimated_minutes",
+      "expected_resolution",
       "outcome",
       "priority",
       "status",
+      "waiting_on",
     ]);
   });
 
-  it("writes null for a cleared completed date", () => {
-    const written = taskMutableToFrontmatter({
-      status: "in-progress",
-      priority: "high",
-      due: undefined,
-      estimatedMinutes: undefined,
-      completed: undefined,
-      outcome: undefined,
-    });
+  it("writes null for cleared values", () => {
+    const written = taskMutableToFrontmatter(blank);
     expect(written["completed"]).toBeNull();
+    expect(written["blocked_since"]).toBeNull();
+    expect(written["waiting_on"]).toBeNull();
+  });
+
+  it("writes the blocked fields when set", () => {
+    const written = taskMutableToFrontmatter({
+      ...blank,
+      status: "blocked",
+      blockedSince: "2026-10-04",
+      blockedBy: "Client",
+      waitingOn: "Credentials",
+      expectedResolution: "2026-10-07",
+    });
+    expect(written["blocked_since"]).toBe("2026-10-04");
+    expect(written["blocked_by"]).toBe("Client");
+    expect(written["waiting_on"]).toBe("Credentials");
+    expect(written["expected_resolution"]).toBe("2026-10-07");
   });
 });

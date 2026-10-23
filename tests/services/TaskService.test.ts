@@ -23,6 +23,11 @@ function makeTask(overrides: Partial<Task> = {}): Task {
     created: "2026-10-01",
     completed: undefined,
     outcome: undefined,
+    blockedSince: undefined,
+    blockedBy: undefined,
+    waitingOn: undefined,
+    expectedResolution: undefined,
+    recurrence: undefined,
     ...overrides,
   };
 }

@@ -43,6 +43,11 @@ function makeTask(overrides: Partial<Task> = {}): Task {
     created: "2026-10-01",
     completed: undefined,
     outcome: undefined,
+    blockedSince: undefined,
+    blockedBy: undefined,
+    waitingOn: undefined,
+    expectedResolution: undefined,
+    recurrence: undefined,
     ...overrides,
   };
 }
@@ -57,7 +62,9 @@ function expectOk(result: Result<Task>): Task {
 describe("canChangeStatus", () => {
   for (const from of TASK_STATUSES) {
     for (const to of TASK_STATUSES) {
-      const expected = EXPECTED_ALLOWED.some(([f, t]) => f === from && t === to);
+      const expected = EXPECTED_ALLOWED.some(
+        ([f, t]) => f === from && t === to,
+      );
       it(`${from} -> ${to} is ${expected ? "allowed" : "rejected"}`, () => {
         expect(canChangeStatus(from, to)).toBe(expected);
       });
