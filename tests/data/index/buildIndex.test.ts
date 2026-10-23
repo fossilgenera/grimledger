@@ -82,6 +82,7 @@ describe("buildIndex: mapping", () => {
       projects: EMPTY,
       tasks: EMPTY,
       workSessions: EMPTY,
+      blockers: EMPTY,
     });
   });
 
@@ -151,6 +152,7 @@ describe("buildIndex: mapping", () => {
       projects: EMPTY,
       tasks: EMPTY,
       workSessions: EMPTY,
+      blockers: EMPTY,
     });
   });
 });

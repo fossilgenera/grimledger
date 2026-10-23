@@ -4,6 +4,7 @@ const CLIENTS_FOLDER = `${WORK_ROOT}/Clients`;
 const PROJECTS_SEGMENT = "Projects";
 const TASKS_SEGMENT = "Tasks";
 const SESSIONS_SEGMENT = "Work Sessions";
+const BLOCKERS_SEGMENT = "Blockers";
 
 const FORBIDDEN_CHARS = /[\\/:*?"<>|#^[\]]/;
 
@@ -67,11 +68,17 @@ function requireFolderOf(notePath: string): string {
 }
 
 /** Built from client note's actual location instead of just the name */
-export function projectFolderPath(clientNotePath: string, projectName: string): string {
+export function projectFolderPath(
+  clientNotePath: string,
+  projectName: string,
+): string {
   return `${requireFolderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${safeName(projectName)}`;
 }
 
-export function projectNotePath(clientNotePath: string, projectName: string): string {
+export function projectNotePath(
+  clientNotePath: string,
+  projectName: string,
+): string {
   const name = safeName(projectName);
   return `${requireFolderOf(clientNotePath)}/${PROJECTS_SEGMENT}/${name}/${name}.md`;
 }
@@ -89,7 +96,10 @@ export function sessionFolderPath(projectNote: string): string {
   return `${requireFolderOf(projectNote)}/${SESSIONS_SEGMENT}`;
 }
 
-export function sessionNotePath(projectNote: string, sessionName: string): string {
+export function sessionNotePath(
+  projectNote: string,
+  sessionName: string,
+): string {
   return `${sessionFolderPath(projectNote)}/${safeName(sessionName)}.md`;
 }
 
@@ -97,4 +107,24 @@ export function sessionNotePath(projectNote: string, sessionName: string): strin
 export function noteNameOf(path: string): string {
   const fileName = path.slice(path.lastIndexOf("/") + 1);
   return fileName.endsWith(".md") ? fileName.slice(0, -3) : fileName;
+}
+
+/** Blocker records live in a Blockers folder beside the project note. */
+export function blockerFolderPath(projectNote: string): string {
+  const projectFolder = folderOf(projectNote);
+  if (projectFolder === "") {
+    throw new Error(`Project note "${projectNote}" is not inside a folder.`);
+  }
+  return `${projectFolder}/${BLOCKERS_SEGMENT}`;
+}
+
+export function blockerNotePath(
+  projectNote: string,
+  blockerName: string,
+): string {
+  const error = validateEntityName(blockerName);
+  if (error !== undefined) {
+    throw new Error(error);
+  }
+  return `${blockerFolderPath(projectNote)}/${blockerName.trim()}.md`;
 }
