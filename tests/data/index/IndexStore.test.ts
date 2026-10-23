@@ -13,6 +13,7 @@ function snapshotWith(clientName: string): IndexSnapshot {
     projects: { items: [], skipped: [] },
     tasks: { items: [], skipped: [] },
     workSessions: { items: [], skipped: [] },
+    blockers: { items: [], skipped: [], },
   };
 }
 

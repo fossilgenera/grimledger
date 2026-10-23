@@ -13,6 +13,7 @@ import { ProjectService } from "./services/ProjectService";
 import { VaultWorkSessionRepository } from "./data/vault/VaultWorkSessionRepository";
 import { SessionService } from "./services/SessionService";
 import { CompletionService } from "./services/CompletionService";
+import { VaultBlockerRepository } from "./data/vault/VaultBlockerRepository";
 
 export default class GrimledgerPlugin extends Plugin {
   override async onload(): Promise<void> {
@@ -23,10 +24,11 @@ export default class GrimledgerPlugin extends Plugin {
     const projects = new VaultProjectRepository(this.app, store);
     const tasks = new VaultTaskRepository(this.app, store);
     const workSessions = new VaultWorkSessionRepository(this.app, store);
+    const blockers = new VaultBlockerRepository(this.app, store);
 
     const today = () => formatIsoDate(new Date());
 
-    const taskService = new TaskService(tasks, today);
+    const taskService = new TaskService(tasks, today, blockers);
     const projectService = new ProjectService(projects);
     const sessionService = new SessionService(tasks, workSessions, today);
     const completionService = new CompletionService(

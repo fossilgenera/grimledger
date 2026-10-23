@@ -15,6 +15,14 @@ export class InMemoryTaskRepository implements TaskRepository {
 
   // How many times update() wrote a task.
   updateCount = 0;
+  // How many times create() wrote a task.
+  createCount = 0;
+  // When set, create() fails with this reason without writing.
+  createFailure: string | undefined = undefined;
+  // When set, update() fails with this reason without writing.
+  updateFailure: string | undefined = undefined;
+  // Called at the start of every update(), so tests can observe ordering.
+  onUpdate: () => void = () => {};
 
   // Puts a task in the store directly, bypassing create()
   seed(task: Task): void {
@@ -30,6 +38,10 @@ export class InMemoryTaskRepository implements TaskRepository {
   }
 
   async create(input: NewTaskInput): Promise<Result<Task>> {
+    if (this.createFailure !== undefined) {
+      return fail(this.createFailure);
+    }
+
     const nameError = validateEntityName(input.name);
     if (nameError !== undefined) {
       return fail(nameError);
@@ -60,10 +72,15 @@ export class InMemoryTaskRepository implements TaskRepository {
       recurrence: input.recurrence,
     };
     this.tasks.set(path, task);
+    this.createCount += 1;
     return ok(task);
   }
 
   async update(task: Task): Promise<Result<Task>> {
+    this.onUpdate();
+    if (this.updateFailure !== undefined) {
+      return fail(this.updateFailure);
+    }
     if (!this.tasks.has(task.path)) {
       return fail(`Task note "${task.path}" does not exist.`);
     }

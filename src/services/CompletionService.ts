@@ -5,6 +5,7 @@ import { applyStatusChange } from "../domain/rules/taskStatus";
 import type { IsoDate } from "../domain/types";
 import type { SessionService } from "./SessionService";
 import type { TaskService } from "./TaskService";
+import { nextOccurrence } from "../domain/rules/nextOccurrence";
 
 export interface CompleteInput {
   taskPath: string;
@@ -45,6 +46,12 @@ export class CompletionService {
     const check = applyStatusChange(task, "complete", this.today());
     if (!check.ok) {
       return check;
+    }
+
+    // A repeating task with no due date is refused here too, before any session is written.
+    const next = nextOccurrence(task, this.today());
+    if (!next.ok) {
+      return next;
     }
 
     const logged = await this.sessionService.logTime({

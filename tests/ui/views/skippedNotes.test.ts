@@ -13,6 +13,7 @@ function indexWithSkipped(
   projects: string[],
   tasks: string[],
   workSessions: string[] = [],
+  blockers: string[] = [],
 ): IndexSnapshot {
   const skip = (paths: string[]) =>
     paths.map((path) => ({ path, reason: `bad ${path}` }));
@@ -21,6 +22,7 @@ function indexWithSkipped(
     projects: { items: [], skipped: skip(projects) },
     tasks: { items: [], skipped: skip(tasks) },
     workSessions: { items: [], skipped: skip(workSessions) },
+    blockers: { items: [], skipped: skip(blockers) },
   };
 }
 
@@ -67,7 +69,12 @@ describe("collectSkipped", () => {
   });
 
   it("does not modify its input", () => {
-    const index = indexWithSkipped(["b.md", "a.md"], ["d.md"], ["c.md"], ["e.md"]);
+    const index = indexWithSkipped(
+      ["b.md", "a.md"],
+      ["d.md"],
+      ["c.md"],
+      ["e.md"],
+    );
     Object.freeze(index.clients.skipped);
     Object.freeze(index.projects.skipped);
     Object.freeze(index.tasks.skipped);

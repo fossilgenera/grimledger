@@ -3,6 +3,7 @@ import type { Task } from "../../src/domain/models/task";
 import type { Result } from "../../src/domain/result";
 import { TaskService } from "../../src/services/TaskService";
 import { InMemoryTaskRepository } from "./fakes/InMemoryTaskRepository";
+import { InMemoryBlockerRepository } from "./fakes/InMemoryBlockerRepository";
 
 const TODAY = "2026-10-05";
 
@@ -51,7 +52,7 @@ let service: TaskService;
 
 beforeEach(() => {
   repo = new InMemoryTaskRepository();
-  service = new TaskService(repo, () => TODAY);
+  service = new TaskService(repo, () => TODAY, new InMemoryBlockerRepository());
 });
 
 describe("createTask", () => {

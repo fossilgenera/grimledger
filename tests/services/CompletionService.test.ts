@@ -8,6 +8,7 @@ import { SessionService } from "../../src/services/SessionService";
 import { TaskService } from "../../src/services/TaskService";
 import { makeTask } from "../queries/builders";
 import { InMemoryWorkSessionRepository } from "./fakes/InMemoryWorkSessionRepository";
+import { InMemoryBlockerRepository } from "./fakes/InMemoryBlockerRepository";
 
 const TODAY = "2026-10-19";
 
@@ -43,7 +44,7 @@ function setup(task: Task = makeTask("Fix mapping", { status: "in-progress" })) 
   const today = () => TODAY;
   const service = new CompletionService(
     tasks,
-    new TaskService(tasks, today),
+    new TaskService(tasks, today, new InMemoryBlockerRepository()),
     new SessionService(tasks, sessions, today),
     today,
   );
@@ -135,5 +136,23 @@ describe("CompletionService.complete with time", () => {
       expect(result.reason).toContain("disk full");
     }
     expect(sessions.createCalls).toBe(1);
+  });
+});
+
+describe("CompletionService.complete with a repeating task", () => {
+  it("writes nothing when the task repeats but has no due date", async () => {
+    const { service, tasks, sessions, task } = setup(
+      makeTask("Weekly update", {
+        status: "in-progress",
+        recurrence: { unit: "week", every: 1 },
+      }),
+    );
+    const result = await service.complete({ taskPath: task.path, minutes: 30 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toContain("no due date");
+    }
+    expect(sessions.createCalls).toBe(0);
+    expect(tasks.updateCalls).toBe(0);
   });
 });
