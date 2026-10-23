@@ -161,3 +161,32 @@ describe("allowedStatusChanges", () => {
     }
   });
 });
+
+describe("applyStatusChange: blocked fields", () => {
+  function blockedTask(): Task {
+    return makeTask({
+      status: "blocked",
+      blockedSince: "2026-10-01",
+      blockedBy: "Client",
+      waitingOn: "Credentials",
+      expectedResolution: "2026-10-07",
+    });
+  }
+
+  for (const target of ["in-progress", "complete", "cancelled"] as const) {
+    it(`clears the blocked fields when a blocked task becomes ${target}`, () => {
+      const updated = expectOk(applyStatusChange(blockedTask(), target, TODAY));
+      expect(updated.blockedSince).toBeUndefined();
+      expect(updated.blockedBy).toBeUndefined();
+      expect(updated.waitingOn).toBeUndefined();
+      expect(updated.expectedResolution).toBeUndefined();
+    });
+  }
+
+  it("does not invent blocked fields when moving to blocked", () => {
+    const task = makeTask({ status: "in-progress" });
+    const updated = expectOk(applyStatusChange(task, "blocked", TODAY));
+    expect(updated.blockedSince).toBeUndefined();
+    expect(updated.waitingOn).toBeUndefined();
+  });
+});
