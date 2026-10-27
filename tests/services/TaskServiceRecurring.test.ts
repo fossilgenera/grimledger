@@ -45,7 +45,11 @@ function named(name: string): Task | undefined {
 
 beforeEach(() => {
   tasks = new InMemoryTaskRepository();
-  service = new TaskService(tasks, () => TODAY, new InMemoryBlockerRepository());
+  service = new TaskService(
+    tasks,
+    () => TODAY,
+    new InMemoryBlockerRepository(),
+  );
 });
 
 describe("createTask with a recurrence", () => {
@@ -59,6 +63,7 @@ describe("createTask with a recurrence", () => {
       }),
     );
     expect(reason).toContain("due date");
+    expect(reason).toContain("first occurrence");
     expect(tasks.createCount).toBe(0);
   });
 
@@ -110,7 +115,10 @@ describe("completeTask with a recurrence", () => {
   });
 
   it("creates nothing for a task that does not repeat", async () => {
-    const task = makeTask("One off", { status: "in-progress", due: "2026-10-02" });
+    const task = makeTask("One off", {
+      status: "in-progress",
+      due: "2026-10-02",
+    });
     tasks.seed(task);
     expectOk(await service.completeTask(task.path));
     expect(tasks.createCount).toBe(0);
@@ -119,7 +127,9 @@ describe("completeTask with a recurrence", () => {
   it("refuses a repeating task with no due date and writes nothing", async () => {
     const task = repeating({ due: undefined });
     tasks.seed(task);
-    expect(reasonOf(await service.completeTask(task.path))).toContain("no due date");
+    const reason = reasonOf(await service.completeTask(task.path));
+    expect(reason).toContain("no due date");
+    expect(reason).toContain("this occurrence");
     expect(tasks.createCount).toBe(0);
     expect(tasks.updateCount).toBe(0);
     expect(tasks.get(task.path)?.status).toBe("in-progress");
@@ -147,7 +157,9 @@ describe("completeTask with a recurrence", () => {
     tasks.updateFailure = undefined;
     expectOk(await service.completeTask(task.path));
     expect(tasks.createCount).toBe(1);
-    expect(tasks.list().items.filter((t) => t.name === NEXT_NAME)).toHaveLength(1);
+    expect(tasks.list().items.filter((t) => t.name === NEXT_NAME)).toHaveLength(
+      1,
+    );
     expect(tasks.get(task.path)?.status).toBe("complete");
   });
 

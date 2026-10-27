@@ -26,7 +26,7 @@ export function nextOccurrence(
   }
   if (task.due === undefined) {
     return fail(
-      `"${task.name}" repeats but has no due date. Add a due date, then complete it again.`,
+      `"${task.name}" repeats, but this occurrence has no due date, so the next one cannot be scheduled. Add a due date to it, then complete it again.`,
     );
   }
   const due = nextDueDate(task.due, task.recurrence, today);

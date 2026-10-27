@@ -78,7 +78,9 @@ export class CreateTaskModal extends Modal {
 
     new Setting(this.contentEl)
       .setName("Due date")
-      .setDesc("Optional. Format YYYY-MM-DD.")
+      .setDesc(
+        "Optional. Format YYYY-MM-DD. For a repeating task, this is the due date of the first occurrence.",
+      )
       .addText((text) => {
         text.setPlaceholder("2026-10-12").onChange((value) => {
           this.due = value;
@@ -97,7 +99,9 @@ export class CreateTaskModal extends Modal {
 
     new Setting(this.contentEl)
       .setName("Repeats")
-      .setDesc("Optional. A repeating task needs a due date.")
+      .setDesc(
+        "Optional. Each repeat is its own task. Completing one creates the next. Needs the due date above.",
+      )
       .addDropdown((dropdown) => {
         dropdown.addOption("none", "Does not repeat");
         for (const unit of RECURRENCE_UNITS) {
@@ -175,7 +179,9 @@ export class CreateTaskModal extends Modal {
     let recurrence: Recurrence | undefined;
     if (this.repeatUnit != "none") {
       if (due.value === undefined) {
-        this.showError("A repeating task needs a due date.");
+        this.showError(
+          "A repeating task needs a due date for its first occurrence.",
+        );
         return;
       }
       const checked = validateRecurrence(

@@ -31,7 +31,9 @@ export class TaskService {
 
   async createTask(input: CreateTaskInput): Promise<Result<Task>> {
     if (input.recurrence !== undefined && input.due === undefined) {
-      return fail("A repeating task needs a due date.");
+      return fail(
+        "A repeating task needs a due date for its first occurrence.",
+      );
     }
     return this.tasks.create({ ...input, created: this.today() });
   }

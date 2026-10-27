@@ -75,6 +75,7 @@ describe("nextOccurrence", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.reason).toContain("no due date");
+      expect(result.reason).toContain("this occurrence");
     }
   });
 });

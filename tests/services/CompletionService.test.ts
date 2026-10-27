@@ -38,7 +38,9 @@ class StubTaskRepository implements TaskRepository {
   }
 }
 
-function setup(task: Task = makeTask("Fix mapping", { status: "in-progress" })) {
+function setup(
+  task: Task = makeTask("Fix mapping", { status: "in-progress" }),
+) {
   const tasks = new StubTaskRepository([task]);
   const sessions = new InMemoryWorkSessionRepository();
   const today = () => TODAY;
@@ -151,6 +153,7 @@ describe("CompletionService.complete with a repeating task", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.reason).toContain("no due date");
+      expect(result.reason).toContain("this occurrence");
     }
     expect(sessions.createCalls).toBe(0);
     expect(tasks.updateCalls).toBe(0);
