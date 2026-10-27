@@ -122,3 +122,8 @@
 .grimledger-error {
     color: var(--text-error);
 }
+
+.grimledger-row-detail {
+    color: var(--text-muted);
+    font-size: 0.85em;
+}

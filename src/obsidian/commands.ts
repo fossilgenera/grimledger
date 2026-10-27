@@ -25,6 +25,8 @@ import type { SessionService } from "../services/SessionService";
 import type { CompletionService } from "../services/CompletionService";
 import { LogTimeModal } from "../ui/modals/LogTimeModal";
 import type { IsoDate } from "../domain/types";
+import { blockedTasks } from "../queries/blockedTasks";
+import { BlockTaskModal } from "../ui/modals/BlockTaskModal";
 
 export interface Repositories {
   clients: ClientRepository;
@@ -156,9 +158,10 @@ export function registerCommands(
         repositories.tasks.list().items,
         "No tasks.",
         (chosen) => {
-          // Completing goes through "Complete task", which records the outcome.
+          // Completing goes through "Complete task", which records the outcome. Blocking goes through "Block task",
+          // which records the reason.
           const targets = allowedStatusChanges(chosen.task.status).filter(
-            (status) => status !== "complete",
+            (status) => status !== "complete" && status !== "blocked",
           );
           if (targets.length === 0) {
             new Notice("No status changes are available for this task.");
@@ -214,6 +217,61 @@ export function registerCommands(
           ).open();
         },
         true,
+      );
+    },
+  });
+
+  plugin.addCommand({
+    id: "block-task",
+    name: "Block task",
+    callback: () => {
+      pickTask(
+        plugin.app,
+        repositories,
+        openTasks(repositories.tasks.list().items).filter(
+          (task) => task.status !== "blocked",
+        ),
+        "No open tasks to block.",
+        (chosen) => {
+          new BlockTaskModal(
+            plugin.app,
+            services.tasks,
+            chosen,
+            today(),
+          ).open();
+        },
+        true,
+      );
+    },
+  });
+
+  plugin.addCommand({
+    id: "unblock-task",
+    name: "Unblock task",
+    callback: () => {
+      pickTask(
+        plugin.app,
+        repositories,
+        blockedTasks(repositories.tasks.list().items),
+        "No blocked tasks.",
+        (chosen) => {
+          services.tasks
+            .unblockTask(chosen.task.path)
+            .then((result) => {
+              new Notice(
+                result.ok
+                  ? `"${result.value.name}" is no longer blocked.`
+                  : result.reason,
+                10000,
+              );
+            })
+            .catch((error: unknown) => {
+              console.error("Grimledger: could not unblock task", error);
+              new Notice(
+                "Could not unblock the task. See the developer console.",
+              );
+            });
+        },
       );
     },
   });

@@ -9,6 +9,7 @@ import { useIndex } from "../hooks/useIndex";
 import { useToday } from "../hooks/useToday";
 import { ActiveProjectsSection } from "./ActiveProjectsSection";
 import { CurrentFocusSection } from "./CurrentFocusSection";
+import { describeBlocked } from "./describeBlocked";
 import { collectSkipped } from "./skippedNotes";
 import { SkippedNotesList } from "./SkippedNotesList";
 import { TaskSection } from "./TaskSection";
@@ -41,10 +42,31 @@ export function DashboardApp({ store, today, openNote }: DashboardAppProps) {
       {hasNoTasks(sections) && (
         <p className="grimledger-empty">Nothing needs attention.</p>
       )}
-      <TaskSection title="Overdue" rows={sections.overdue} today={date} onOpen={openNote} />
-      <TaskSection title="Due today" rows={sections.dueToday} today={date} onOpen={openNote} />
-      <TaskSection title="Blocked" rows={sections.blocked} today={date} onOpen={openNote} />
-      <TaskSection title="Upcoming" rows={sections.upcoming} today={date} onOpen={openNote} />
+      <TaskSection
+        title="Overdue"
+        rows={sections.overdue}
+        today={date}
+        onOpen={openNote}
+      />
+      <TaskSection
+        title="Due today"
+        rows={sections.dueToday}
+        today={date}
+        onOpen={openNote}
+      />
+      <TaskSection
+        title="Blocked"
+        rows={sections.blocked}
+        today={date}
+        onOpen={openNote}
+        detail={(task) => describeBlocked(task, date)}
+      />
+      <TaskSection
+        title="Upcoming"
+        rows={sections.upcoming}
+        today={date}
+        onOpen={openNote}
+      />
 
       <ActiveProjectsSection groups={groups} onOpen={openNote} />
 

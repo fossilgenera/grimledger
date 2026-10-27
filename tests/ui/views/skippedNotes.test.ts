@@ -100,3 +100,10 @@ describe("describeSkippedCount", () => {
     expect(() => describeSkippedCount(bad)).toThrow();
   });
 });
+
+describe("collectSkipped: blockers", () => {
+  it("includes skipped blockers", () => {
+    const result = collectSkipped(indexWithSkipped([], [], [], [], ["b.md"]));
+    expect(result).toEqual([{ path: "b.md", reason: "bad b.md", kind: "blocker" }]);
+  });
+});

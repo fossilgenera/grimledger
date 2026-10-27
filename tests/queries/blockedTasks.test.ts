@@ -48,3 +48,31 @@ describe("blockedTasks", () => {
     expect(() => blockedTasks(tasks)).not.toThrow();
   });
 });
+
+describe("blockedTasks: order", () => {
+  it("puts the longest-blocked task first", () => {
+    const tasks = [
+      makeTask("A", { status: "blocked", blockedSince: "2026-10-03" }),
+      makeTask("B", { status: "blocked", blockedSince: "2026-10-01" }),
+      makeTask("C", { status: "blocked", blockedSince: "2026-10-02" }),
+    ];
+    expect(names(blockedTasks(tasks))).toEqual(["B", "C", "A"]);
+  });
+
+  it("puts tasks with no blocked since date last, by path", () => {
+    const tasks = [
+      makeTask("Z", { status: "blocked" }),
+      makeTask("Y", { status: "blocked" }),
+      makeTask("M", { status: "blocked", blockedSince: "2026-10-04" }),
+    ];
+    expect(names(blockedTasks(tasks))).toEqual(["M", "Y", "Z"]);
+  });
+
+  it("breaks ties by path", () => {
+    const tasks = [
+      makeTask("B", { status: "blocked", blockedSince: "2026-10-01" }),
+      makeTask("A", { status: "blocked", blockedSince: "2026-10-01" }),
+    ];
+    expect(names(blockedTasks(tasks))).toEqual(["A", "B"]);
+  });
+});
