@@ -3,6 +3,7 @@ import { createRoot, type Root } from "react-dom/client";
 import type { IndexStore } from "../../data/index/IndexStore";
 import type { IsoDate } from "../../domain/types";
 import { DashboardApp } from "./DashboardApp";
+import { openNoteInTab } from "../../obsidian/openNote";
 
 export const DASHBOARD_VIEW_TYPE = "grimledger-dashboard";
 
@@ -30,11 +31,11 @@ export class DashboardView extends ItemView {
   }
 
   private readonly openNote = (path: string): void => {
-    this.app.workspace.openLinkText(path, "", "tab").catch((error: unknown) => {
+    openNoteInTab(this.app, path).catch((error: unknown) => {
       console.error("Grimledger: could not open note", path, error);
       new Notice(`Could not open "${path}". See the developer console.`);
-    })
-  }
+    });
+  };
 
   override async onOpen(): Promise<void> {
     this.root = createRoot(this.contentEl);
@@ -43,7 +44,8 @@ export class DashboardView extends ItemView {
         store={this.store}
         today={this.today}
         openNote={this.openNote}
-      />);
+      />,
+    );
   }
 
   override async onClose(): Promise<void> {

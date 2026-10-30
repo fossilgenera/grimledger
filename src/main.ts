@@ -14,6 +14,9 @@ import { VaultWorkSessionRepository } from "./data/vault/VaultWorkSessionReposit
 import { SessionService } from "./services/SessionService";
 import { CompletionService } from "./services/CompletionService";
 import { VaultBlockerRepository } from "./data/vault/VaultBlockerRepository";
+import { VaultDailyNoteRepository } from "./data/vault/VaultDailyNoteRepository";
+import { DailyNoteService } from "./services/DailyNoteService";
+import { registerDailyNotes } from "./obsidian/dailyNotes";
 
 export default class GrimledgerPlugin extends Plugin {
   override async onload(): Promise<void> {
@@ -25,6 +28,7 @@ export default class GrimledgerPlugin extends Plugin {
     const tasks = new VaultTaskRepository(this.app, store);
     const workSessions = new VaultWorkSessionRepository(this.app, store);
     const blockers = new VaultBlockerRepository(this.app, store);
+    const dailyNotes = new VaultDailyNoteRepository(this.app, store);
 
     const today = () => formatIsoDate(new Date());
 
@@ -50,6 +54,7 @@ export default class GrimledgerPlugin extends Plugin {
       today,
     );
     registerDashboard(this, store, today);
+    registerDailyNotes(this, new DailyNoteService(dailyNotes, today));
     registerIndexEvents(this, () => indexer.rebuild());
   }
 }
