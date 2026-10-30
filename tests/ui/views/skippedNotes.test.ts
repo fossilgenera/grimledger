@@ -14,6 +14,7 @@ function indexWithSkipped(
   tasks: string[],
   workSessions: string[] = [],
   blockers: string[] = [],
+  dailyNotes: string[] = [],
 ): IndexSnapshot {
   const skip = (paths: string[]) =>
     paths.map((path) => ({ path, reason: `bad ${path}` }));
@@ -23,6 +24,7 @@ function indexWithSkipped(
     tasks: { items: [], skipped: skip(tasks) },
     workSessions: { items: [], skipped: skip(workSessions) },
     blockers: { items: [], skipped: skip(blockers) },
+    dailyNotes: { items: [], skipped: skip(dailyNotes) },
   };
 }
 
@@ -104,6 +106,19 @@ describe("describeSkippedCount", () => {
 describe("collectSkipped: blockers", () => {
   it("includes skipped blockers", () => {
     const result = collectSkipped(indexWithSkipped([], [], [], [], ["b.md"]));
-    expect(result).toEqual([{ path: "b.md", reason: "bad b.md", kind: "blocker" }]);
+    expect(result).toEqual([
+      { path: "b.md", reason: "bad b.md", kind: "blocker" },
+    ]);
+  });
+});
+
+describe("collectSkipped: daily notes", () => {
+  it("includes skipped daily notes", () => {
+    const result = collectSkipped(
+      indexWithSkipped([], [], [], [], [], ["d.md"]),
+    );
+    expect(result).toEqual([
+      { path: "d.md", reason: "bad d.md", kind: "daily note" },
+    ]);
   });
 });

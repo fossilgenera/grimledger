@@ -12,6 +12,8 @@ import { ListResult } from "../repositories/ListResult";
 import { noteNameOf } from "../VaultLayout";
 import type { Blocker } from "../../domain/models/blocker";
 import { blockerFromFrontmatter } from "../mapping/blockerMapper";
+import type { DailyNote } from "../../domain/models/dailyNote";
+import { dailyNoteFromFrontmatter } from "../mapping/dailyNoteMapper";
 
 /** What the Obsidian adapter reads from one markdown note. */
 export interface NoteSnapshot {
@@ -34,6 +36,7 @@ export interface IndexSnapshot {
   tasks: ListResult<Task>;
   workSessions: ListResult<WorkSession>;
   blockers: ListResult<Blocker>;
+  dailyNotes: ListResult<DailyNote>;
 }
 
 export const EMPTY_INDEX: IndexSnapshot = {
@@ -42,6 +45,7 @@ export const EMPTY_INDEX: IndexSnapshot = {
   tasks: { items: [], skipped: [] },
   workSessions: { items: [], skipped: [] },
   blockers: { items: [], skipped: [] },
+  dailyNotes: { items: [], skipped: [] },
 };
 
 function comparePath(a: string, b: string): number {
@@ -103,6 +107,7 @@ export function buildIndex(
   const tasks: ListResult<Task> = { items: [], skipped: [] };
   const workSessions: ListResult<WorkSession> = { items: [], skipped: [] };
   const blockers: ListResult<Blocker> = { items: [], skipped: [] };
+  const dailyNotes: ListResult<DailyNote> = { items: [], skipped: [] };
 
   // Pass 2: Map every note that claims one of our types.
   for (const note of sorted) {
@@ -205,11 +210,21 @@ export function buildIndex(
         break;
       }
 
+      case "daily_note": {
+        const mapped = dailyNoteFromFrontmatter(note.path, note.frontmatter);
+        if (mapped.ok) {
+          dailyNotes.items.push(mapped.value);
+        } else {
+          dailyNotes.skipped.push({ path: note.path, reason: mapped.reason });
+        }
+        break;
+      }
+
       default:
         // Not one of our types. Ignored silently.
         break;
     }
   }
 
-  return { clients, projects, tasks, workSessions, blockers };
+  return { clients, projects, tasks, workSessions, blockers, dailyNotes };
 }

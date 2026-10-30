@@ -65,3 +65,18 @@ export function addDays(date: IsoDate, days: number): IsoDate {
 export function daysBetween(from: IsoDate, to: IsoDate): number {
   return (utcMillisOf(to) - utcMillisOf(from)) / MS_PER_DAY;
 }
+
+/** True when text is a real calendar date in YYYY-MM-DD form. */
+export function isIsoDate(text: string): boolean {
+  try {
+    utcMillisOf(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Day of the week: 0 is Sunday, 6 is Saturday. Throws on invalid date. */
+export function dayOfWeek(date: IsoDate): number {
+  return new Date(utcMillisOf(date)).getUTCDay();
+}

@@ -1,3 +1,5 @@
+import { isIsoDate } from "../domain/rules/isoDate";
+
 export const WORK_ROOT = "Work";
 
 const CLIENTS_FOLDER = `${WORK_ROOT}/Clients`;
@@ -127,4 +129,23 @@ export function blockerNotePath(
     throw new Error(error);
   }
   return `${blockerFolderPath(projectNote)}/${blockerName.trim()}.md`;
+}
+
+const DAILY_FOLDER = `${WORK_ROOT}/Daily`;
+
+function requireIsoDate(date: string): string {
+  if (!isIsoDate(date)) {
+    throw new Error(`Not a real ISO date (YYYY-MM-DD): "${date}"`);
+  }
+  return date;
+}
+
+/** Daily notes are grouped by year: "Work/Daily/2026". */
+export function dailyFolderPath(date: string): string {
+  return `${DAILY_FOLDER}/${requireIsoDate(date).slice(0, 4)}`;
+}
+
+/** "Work/Daily/2026/2026-10-27.md" */
+export function dailyNotePath(date: string): string {
+  return `${dailyFolderPath(date)}/${date}.md`;
 }

@@ -6,7 +6,8 @@ export type SkippedKind =
   | "project"
   | "task"
   | "work session"
-  | "blocker";
+  | "blocker"
+  | "daily note";
 
 export interface SkippedEntry extends SkippedNote {
   kind: SkippedKind;
@@ -27,6 +28,7 @@ export function collectSkipped(index: IndexSnapshot): SkippedEntry[] {
     ...withKind(index.tasks.skipped, "task"),
     ...withKind(index.workSessions.skipped, "work session"),
     ...withKind(index.blockers.skipped, "blocker"),
+    ...withKind(index.dailyNotes.skipped, "daily note"),
   ].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 

@@ -14,6 +14,7 @@ function snapshotWith(clientName: string): IndexSnapshot {
     tasks: { items: [], skipped: [] },
     workSessions: { items: [], skipped: [] },
     blockers: { items: [], skipped: [], },
+    dailyNotes: { items: [], skipped: [] },
   };
 }
 
