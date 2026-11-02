@@ -5,6 +5,7 @@ import {
   currentFocusProjects,
 } from "../../queries/projectOverview";
 import { hasNoTasks, taskSections } from "../../queries/taskSections";
+import { todaySummary } from "../../queries/todaySummary";
 import { useIndex } from "../hooks/useIndex";
 import { useToday } from "../hooks/useToday";
 import { ActiveProjectsSection } from "./ActiveProjectsSection";
@@ -13,15 +14,23 @@ import { describeBlocked } from "./describeBlocked";
 import { collectSkipped } from "./skippedNotes";
 import { SkippedNotesList } from "./SkippedNotesList";
 import { TaskSection } from "./TaskSection";
+import { TodaySection } from "./TodaySection";
 
 interface DashboardAppProps {
   store: IndexStore;
   today: () => IsoDate;
   /** Opens the note at this vault path. Supplied by the Obsidian side. */
   openNote: (path: string) => void;
+  /** Creates (if needed) and opens today's daily note. */
+  openToday: () => void;
 }
 
-export function DashboardApp({ store, today, openNote }: DashboardAppProps) {
+export function DashboardApp({
+  store,
+  today,
+  openNote,
+  openToday,
+}: DashboardAppProps) {
   const index = useIndex(store);
   const date = useToday(today);
 
@@ -31,11 +40,23 @@ export function DashboardApp({ store, today, openNote }: DashboardAppProps) {
   const groups = activeProjectsByClient(projects, tasks);
   const sections = taskSections(tasks, projects, date);
   const skipped = collectSkipped(index);
+  const summary = todaySummary(
+    index.dailyNotes.items,
+    index.workSessions.items,
+    tasks,
+    date,
+  );
 
   return (
     <div className="grimledger-dashboard">
       <h2>Grimledger</h2>
       <p className="grimledger-date">{date}</p>
+
+      <TodaySection
+        summary={summary}
+        onOpenToday={openToday}
+        onOpen={openNote}
+      />
 
       <CurrentFocusSection rows={focus} onOpen={openNote} />
 

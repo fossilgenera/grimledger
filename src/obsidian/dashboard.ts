@@ -22,10 +22,11 @@ export function registerDashboard(
   plugin: Plugin,
   store: IndexStore,
   today: () => IsoDate,
+  openToday: () => void,
 ): void {
   plugin.registerView(
     DASHBOARD_VIEW_TYPE,
-    (leaf) => new DashboardView(leaf, store, today),
+    (leaf) => new DashboardView(leaf, store, today, openToday),
   );
 
   plugin.addCommand({

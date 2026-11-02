@@ -53,8 +53,11 @@ export default class GrimledgerPlugin extends Plugin {
       },
       today,
     );
-    registerDashboard(this, store, today);
-    registerDailyNotes(this, new DailyNoteService(dailyNotes, today));
+    const openToday = registerDailyNotes(
+      this,
+      new DailyNoteService(dailyNotes, today),
+    );
+    registerDashboard(this, store, today, openToday);
     registerIndexEvents(this, () => indexer.rebuild());
   }
 }

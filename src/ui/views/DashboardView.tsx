@@ -18,6 +18,7 @@ export class DashboardView extends ItemView {
     leaf: WorkspaceLeaf,
     private readonly store: IndexStore,
     private readonly today: () => IsoDate,
+    private readonly openToday: () => void,
   ) {
     super(leaf);
   }
@@ -44,6 +45,7 @@ export class DashboardView extends ItemView {
         store={this.store}
         today={this.today}
         openNote={this.openNote}
+        openToday={this.openToday}
       />,
     );
   }
