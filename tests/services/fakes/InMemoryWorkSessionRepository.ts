@@ -1,5 +1,5 @@
 import type { WorkSession } from "../../../src/domain/models/workSession";
-import { ok, type Result } from "../../../src/domain/result";
+import { fail, ok, type Result } from "../../../src/domain/result";
 import { nextSessionName } from "../../../src/domain/rules/sessionName";
 import type { ListResult } from "../../../src/data/repositories/ListResult";
 import type {
@@ -11,6 +11,11 @@ import type {
 export class InMemoryWorkSessionRepository implements WorkSessionRepository {
   readonly sessions: WorkSession[] = [];
   createCalls = 0;
+  updateCalls = 0;
+  /** When set, create() fails with this reason without writing. */
+  createFailure: string | undefined = undefined;
+  /** When set, update() fails with this reason without writing. */
+  updateFailure: string | undefined = undefined;
 
   list(): ListResult<WorkSession> {
     return { items: [...this.sessions], skipped: [] };
@@ -18,6 +23,9 @@ export class InMemoryWorkSessionRepository implements WorkSessionRepository {
 
   async create(input: NewWorkSessionInput): Promise<Result<WorkSession>> {
     this.createCalls += 1;
+    if (this.createFailure !== undefined) {
+      return fail(this.createFailure);
+    }
     const name = nextSessionName(
       input.date,
       input.task.name,
@@ -32,6 +40,21 @@ export class InMemoryWorkSessionRepository implements WorkSessionRepository {
       note: input.note,
     };
     this.sessions.push(session);
+    return ok(session);
+  }
+
+  async update(session: WorkSession): Promise<Result<WorkSession>> {
+    this.updateCalls += 1;
+    if (this.updateFailure !== undefined) {
+      return fail(this.updateFailure);
+    }
+    const index = this.sessions.findIndex(
+      (candidate) => candidate.path === session.path,
+    );
+    if (index === -1) {
+      return fail(`Work session note "${session.path}" does not exist.`);
+    }
+    this.sessions[index] = session;
     return ok(session);
   }
 }
